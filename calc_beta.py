@@ -21,15 +21,22 @@ def read_frequences(filename):
     get_freq_RE = re.compile(r"^\s+\d+\s+([\+\-]?\d+\.\d+)(?:\s+[\+\-]?\d+\.\d+)?\s*$",
                      re.MULTILINE)
 
+    get_freq_weights_RE = re.compile(r"^\s+q-pt=\s+\d+\s+[\+\-]?\d+\.\d+\s+[\+\-]?\d+\.\d+\s+[\+\-]?\d+\.\d+\s+(\d+\.\d+)\s*$", re.MULTILINE)
+
     fh = open(filename, 'r')
-    freq_grps = get_freq_RE.findall(fh.read())
+    filelines = fh.read()
+    freq_grps = get_freq_RE.findall(filelines)
+    wgt_grps = get_freq_weights_RE.findall(filelines)
     fh.close
+    wgts = []
+    for wgt in wgt_grps:
+        wgts.append(float(wgt))
     freqs = []
     for freq in freq_grps:
         freqs.append(float(freq))
-    return freqs
+    return freqs, wgts
 
-def beta(T, N, Nq, freq, freqstar):
+def beta(T, N, freq, freqstar, wgt, wgtstar):
 
     h = 4.135667516E-15 # eV.s
     k = 8.6173324E-3 # eV/K
@@ -37,31 +44,39 @@ def beta(T, N, Nq, freq, freqstar):
     cm2Hz = 0.03E12 # *cm^-1 to give Hz (1/s)
 
     assert len(freq)==len(freqstar)
-
+    assert wgt == wgtstar
+ 
+    N_qpt = len(wgt) 
+    N_fr = len(freq)/N_qpt
+    i = 0
     beta = 1.0
-    for vs, v in zip(freqstar, freq):
-        if v <= 0.0:
-            continue
-        if vs <= 0.0:
-            continue
-        vs = vs*cm2Hz
-        v = v*cm2Hz
-        evs = m.exp((-1.0*h*vs)/(2.0*k*T))
-        ev = m.exp((-1.0*h*v)/(2.0*k*T))
-        beta = beta * (vs/v) * (evs / (1.0-evs)) * ((1.0-ev)/ev)
+    for Nqwt in wgt:
+        this_bt = 1.0
+        for vs, v in zip(freqstar[i*N_fr:i*N_fr+N_fr], freq[i*N_fr:i*N_fr+N_fr]):
+            if v <= 0.0:
+               continue
+            if vs <= 0.0:
+                continue
+            vs = vs*cm2Hz
+            v = v*cm2Hz
+            evs = m.exp((-1.0*h*vs)/(2.0*k*T))
+            ev = m.exp((-1.0*h*v)/(2.0*k*T))
+            this_bt = this_bt * (vs/v) * (evs / (1.0-evs)) * ((1.0-ev)/ev)
+        beta = beta*this_bt**Nqwt
+        i = i + 1
 
-    beta = beta**(1.0/(Nq*N))
+    beta = beta**(1.0/N)
 
     return beta
     
 
 if __name__ == "__main__":
     import sys
-    v = read_frequences(sys.argv[1])
-    vs = read_frequences(sys.argv[2])
+    v, w = read_frequences(sys.argv[1])
+    vs, ws = read_frequences(sys.argv[2])
 
     for T in [10, 100, 300, 500, 1000, 1500, 2000, 2500]:
-        b = beta(T, 4, 4, v, vs)
+        b = beta(T, 4, v, vs, w, ws)
         print T, b, m.log(b)*1E3
         
 
