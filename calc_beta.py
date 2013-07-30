@@ -39,7 +39,7 @@ def read_frequences(filename):
 def beta(T, N, freq, freqstar, wgt, wgtstar):
 
     h = 4.135667516E-15 # eV.s
-    k = 8.6173324E-3 # eV/K
+    k = 8.6173324E-5 # eV/K
     cm2ev = 1.23984E-4 # *cm^-1 to give eV
     cm2Hz = 0.03E12 # *cm^-1 to give Hz (1/s)
 
