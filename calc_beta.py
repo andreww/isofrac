@@ -60,8 +60,10 @@ def beta(T, N, freq, freqstar, wgt, wgtstar):
             vs = vs*cm2Hz
             v = v*cm2Hz
             evs = m.exp((-1.0*h*vs)/(2.0*k*T))
+            evsb = m.exp((-1.0*h*vs)/(k*T))
             ev = m.exp((-1.0*h*v)/(2.0*k*T))
-            this_bt = this_bt * (vs/v) * (evs / (1.0-evs)) * ((1.0-ev)/ev)
+            evb = m.exp((-1.0*h*v)/(k*T))
+            this_bt = this_bt * (vs/v) * (evs / (1.0-evsb)) * ((1.0-evb)/ev)
         beta = beta*this_bt**Nqwt
         i = i + 1
 
