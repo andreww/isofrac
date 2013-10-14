@@ -77,8 +77,8 @@ if __name__ == "__main__":
     v, w = read_frequences(sys.argv[1])
     vs, ws = read_frequences(sys.argv[2])
 
-    for T in [10, 100, 300, 500, 1000, 1500, 2000, 2500]:
-        b = beta(T, 4, v, vs, w, ws)
+    for T in [15, 30, 60, 120, 240, 300, 500, 670, 1000, 1500, 2000, 2500, 2600, 3000, 3500, 3700, 4000]:
+        b = beta(T, 1, v, vs, w, ws)
         print T, b, m.log(b)*1E3
         
 
