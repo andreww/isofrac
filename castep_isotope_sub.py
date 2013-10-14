@@ -8,6 +8,7 @@ and fit the results
 import os
 import subprocess
 import numpy as np
+import scipy.optimize as spopt
 
 import calc_beta
 
@@ -66,9 +67,25 @@ def run_phonons(seedname):
 
     return(v, w, vs, ws)
 
+def fit_beta_func(seedname):
+
+    # Get betas for T = 300 - 4000
+    (v, w, vs, ws) = run_phonons(seedname)
+    Ts = np.linspace(300.0, 4000.0, num=4000)
+    betas = calc_beta.beta_T(Ts, 1, v, vs, w, ws)
+    lnbetas = 1000.0 * np.log(betas)
+
+    popt, pconv = spopt.curve_fit(beta_function, Ts, lnbetas, p0=[1E14, -1E10, 1E6])
+    return (popt, pconv)
+    
+
+def beta_function(T, A, B, C):
+    b = A/T**6 + B/T**4 + C/T**2
+    return b
+
 if __name__ == "__main__":
     import sys
     seedname = sys.argv[1]
-    print run_phonons(seedname)
+    print fit_beta_func(seedname)
 
 
