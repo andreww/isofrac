@@ -2,6 +2,7 @@
 
 import re
 import math as m
+import numpy as np
 
 def read_frequences(filename):
     """Return data from <seedname>.phonon
@@ -70,7 +71,16 @@ def beta(T, N, freq, freqstar, wgt, wgtstar):
     beta = beta**(1.0/N)
 
     return beta
-    
+
+def beta_T(Ts, N, freq, freqstar, wgt, wgtstar):
+
+    betas = np.zeros_like(Ts)
+    i = 0
+    for T in Ts:
+        betas[i] = beta(T, N, freq, freqstar, wgt, wgtstar)
+        i = i + 1
+
+    return betas
 
 if __name__ == "__main__":
     import sys
@@ -82,3 +92,9 @@ if __name__ == "__main__":
         print T, b, m.log(b)*1E3
         
 
+    # Or, the 'vectorised' version...
+    Ts = np.array([15.0, 30.0, 60.0, 120.0, 240.0, 300.0, 500.0, 670.0, 1000.0, 1500.0, 2000.0, 2500.0, 2600.0, 3000.0, 3500.0, 3700.0, 4000.0])
+    betas = beta_T(Ts, 1, v, vs, w, ws)
+    print Ts
+    print betas
+    print np.log(betas)*1E3
