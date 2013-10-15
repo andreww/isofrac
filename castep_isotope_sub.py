@@ -9,6 +9,7 @@ import os
 import subprocess
 import numpy as np
 import scipy.optimize as spopt
+import matplotlib.pyplot as plt
 
 import calc_beta
 
@@ -83,9 +84,65 @@ def beta_function(T, A, B, C):
     b = A/T**6 + B/T**4 + C/T**2
     return b
 
+def run_and_report(seedname):
+
+    print "Using 'Phonons' for frequency calculation "
+    print "of 24Mg and 26 Mg substitution into {} ...\n".format(seedname)
+    popt, pconv = fit_beta_func(seedname)
+    print "For function:\n   1000 ln(beta) = A/T^6 + B/T^4 + C/T^2"
+    print "parameters are: \n   A = {:7g} \n   B = {:7g} \n   C = {:7g}".format(popt[0], popt[1], popt[2])
+
+    return (popt, pconv)
+
+
+def plot_beta(Ts, betas, names=None):
+
+    Tsm1 = 1E6/(Ts**2.0)
+    fix, ax1 = plt.subplots()
+    if type(betas) is list or type(betas) is tuple:
+        if names is None:
+            for beta in betas:
+                ax1.plot(Tsm1, beta)
+        else:
+            for beta, name in zip(betas, names):
+                ax1.plot(Tsm1, beta, label=name)
+    else:
+        ax1.plot(Tsm1, betas, "b-")
+    ax1.set_ylabel("1000 * ln beta (per mill)")
+    ax1.set_xlabel("1000000 / T^2 (1^6 K^-2)")
+    ax1.set_xlim(right=Tsm1.max())
+    x1locs, x1labels = plt.xticks()
+
+    ax2 = ax1.twiny()
+    ax2.set_xlabel("T (K)")
+    x2vals = []
+    x2locs = []
+    max_pos = 1E6/(Ts.min()**2.0)
+    min_pos = 1E6/(Ts.max()**2.0)
+    for xloc in np.linspace(min_pos, max_pos, 6):
+        thisval = np.sqrt((1.0/(xloc/1E6)))
+        if thisval != float("inf"):
+            x2vals.append("{:4.0f}".format(thisval))
+            x2locs.append(xloc)
+    plt.xticks(x2locs, x2vals)
+    plt.show()
+
+
 if __name__ == "__main__":
     import sys
     seedname = sys.argv[1]
-    print fit_beta_func(seedname)
+    print "\nCalculation of reduced partition function"
+    print "=========================================\n"
+    (popt, pconv) = run_and_report(seedname)
+    # Tabulate output
+    print "\n T(K)        1000 ln beta"
+    print " -------------------------"
+    for t in [300, 500, 1000, 2600, 3700]:
+        print " {:5f}     {:5f}".format(t, beta_function(t, popt[0], popt[1], popt[2]))
+
+    # Plot output
+    Ts = np.linspace(300.0, 4000.0, num=40)
+    betas = beta_function(Ts, popt[0], popt[1], popt[2])
+    plot_beta(Ts, betas)
 
 
