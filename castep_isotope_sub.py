@@ -13,7 +13,7 @@ import scipy.optimize as spopt
 
 import calc_beta
 
-def produce_dotcell(seedname, mass):
+def produce_dotcell(seedname, mass, fineqpoints=None):
     """
     produce_dotcell: reads <seedname>.cell (CASTEP cell file)
     and writes a new .cell file to <filename> appending
@@ -42,10 +42,16 @@ def produce_dotcell(seedname, mass):
     outputfile.write("    Mg   24.3050000\n")
     outputfile.write(isotope_line)
     outputfile.write("%endblock  SPECIES_MASS\n")
-    outputfile.close
+    if fineqpoints is not None:
+        outputfile.write(
+            "phonon_fine_kpoint_mp_grid {0[0]:d} {0[1]:d} {0[2]:d}\n".format(
+            fineqpoints))
+        # FIXME - should deal with this
+        # phonon_fine_kpoint_mp_offset x y z
+    outputfile.close()
     return()
 
-def run_phonons(seedname):
+def run_phonons(seedname, fineqpoints=None):
     """Does phonon calculation for seedname with 24Mg and 26Mg
        and returns the frequencies and weights"""
 
@@ -53,12 +59,12 @@ def run_phonons(seedname):
         "linux_x86_64_gfortran--serial/phonons"
 
     # Setup and run for light isotope
-    produce_dotcell(seedname, "24Mg")
+    produce_dotcell(seedname, "24Mg", fineqpoints)
     os.symlink(seedname+".param", seedname+"__isotope_l.param")
     subprocess.check_call([phonons_path, seedname+"__isotope_l"])
 
     # Setup and run for heavy isotope
-    produce_dotcell(seedname, "26Mg")
+    produce_dotcell(seedname, "26Mg", fineqpoints)
     os.symlink(seedname+".param", seedname+"__isotope_h.param")
     subprocess.check_call([phonons_path, seedname+"__isotope_h"])
 
@@ -68,10 +74,10 @@ def run_phonons(seedname):
 
     return(v, w, vs, ws)
 
-def fit_beta_func(seedname):
+def fit_beta_func(seedname, fineqpoints=None):
 
     # Get betas for T = 300 - 4000
-    (v, w, vs, ws) = run_phonons(seedname)
+    (v, w, vs, ws) = run_phonons(seedname, fineqpoints)
     Ts = np.linspace(300.0, 4000.0, num=4000)
     betas = calc_beta.beta_T(Ts, 1, v, vs, w, ws)
     lnbetas = 1000.0 * np.log(betas)
@@ -84,11 +90,11 @@ def beta_function(T, A, B, C):
     b = A/T**6 + B/T**4 + C/T**2
     return b
 
-def run_and_report(seedname):
+def run_and_report(seedname, fineqpoints=None):
 
     print "Using 'Phonons' for frequency calculation "
     print "of 24Mg and 26 Mg substitution into {} ...\n".format(seedname)
-    popt, pconv = fit_beta_func(seedname)
+    popt, pconv = fit_beta_func(seedname, fineqpoints)
     print "For function:\n   1000 ln(beta) = A/T^6 + B/T^4 + C/T^2"
     print "parameters are: \n   A = {:7g} \n   B = {:7g} \n   C = {:7g}".format(popt[0], popt[1], popt[2])
 
@@ -147,12 +153,14 @@ if __name__ == "__main__":
                    action="store_true")
     parser.add_argument('-c', '--cleanup', help='remove phonons output',
                    action="store_true")
+    parser.add_argument('-f', '--fineqpoints', nargs=3, type=int,
+                   help='Add fine q-points')
     args = parser.parse_args()
 
     seedname = args.seedname
     print "\nCalculation of reduced partition function"
     print "=========================================\n"
-    (popt, pconv) = run_and_report(seedname)
+    (popt, pconv) = run_and_report(seedname, fineqpoints=args.fineqpoints)
     # Tabulate output
     print "\n T(K)        1000 ln beta"
     print " -------------------------"
