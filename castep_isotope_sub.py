@@ -58,6 +58,10 @@ def run_phonons(seedname, fineqpoints=None):
     phonons_path = "/share/apps/atomistic/CASTEP-6.11-serial/" + \
         "linux_x86_64_gfortran--serial/phonons"
 
+    if fineqpoints is not None:
+        print "phonon_fine_kpoint_mp_grid: {0[0]:d} {0[1]:d} {0[2]}".format(
+            fineqpoints)
+
     # Setup and run for light isotope
     produce_dotcell(seedname, "24Mg", fineqpoints)
     os.symlink(seedname+".param", seedname+"__isotope_l.param")
@@ -71,6 +75,8 @@ def run_phonons(seedname, fineqpoints=None):
     # Pull out the frequencies and weights
     v, w = calc_beta.read_frequences(seedname+"__isotope_l.phonon")
     vs, ws = calc_beta.read_frequences(seedname+"__isotope_h.phonon")
+
+    print "Total q-points: {0:d}\n".format(len(w))
 
     return(v, w, vs, ws)
 
