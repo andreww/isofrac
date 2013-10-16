@@ -9,7 +9,6 @@ import os
 import subprocess
 import numpy as np
 import scipy.optimize as spopt
-import matplotlib.pyplot as plt
 
 import calc_beta
 
@@ -97,6 +96,8 @@ def run_and_report(seedname):
 
 def plot_beta(Ts, betas, names=None):
 
+    import matplotlib.pyplot as plt
+
     Tsm1 = 1E6/(Ts**2.0)
     fix, ax1 = plt.subplots()
     if type(betas) is list or type(betas) is tuple:
@@ -129,8 +130,16 @@ def plot_beta(Ts, betas, names=None):
 
 
 if __name__ == "__main__":
-    import sys
-    seedname = sys.argv[1]
+    import argparse
+    parser = argparse.ArgumentParser(description=
+              'Reduced partition function from Castep.')
+    parser.add_argument('seedname', metavar='seedname', 
+                   action='store', help='Castep seedname')
+    parser.add_argument('--plot', help='generate a matplotlib graph',
+                   action="store_true")
+    args = parser.parse_args()
+
+    seedname = args.seedname
     print "\nCalculation of reduced partition function"
     print "=========================================\n"
     (popt, pconv) = run_and_report(seedname)
@@ -143,6 +152,7 @@ if __name__ == "__main__":
     # Plot output
     Ts = np.linspace(300.0, 4000.0, num=40)
     betas = beta_function(Ts, popt[0], popt[1], popt[2])
-    plot_beta(Ts, betas)
+    if args.plot:
+        plot_beta(Ts, betas)
 
 
