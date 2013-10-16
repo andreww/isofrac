@@ -6,6 +6,7 @@ Trivial script to do castep isotope calculation on top of phonons
 and fit the results
 """
 import os
+import glob
 import subprocess
 import numpy as np
 import scipy.optimize as spopt
@@ -128,6 +129,13 @@ def plot_beta(Ts, betas, names=None):
     plt.xticks(x2locs, x2vals)
     plt.show()
 
+def cleanup(seedname):
+
+    print "Cleaning up..."
+    for file in glob.glob(seedname + "__isotope_h.*") + \
+            glob.glob(seedname + "__isotope_l.*"):
+        os.unlink(file)
+
 
 if __name__ == "__main__":
     import argparse
@@ -136,6 +144,8 @@ if __name__ == "__main__":
     parser.add_argument('seedname', metavar='seedname', 
                    action='store', help='Castep seedname')
     parser.add_argument('--plot', help='generate a matplotlib graph',
+                   action="store_true")
+    parser.add_argument('-c', '--cleanup', help='remove phonons output',
                    action="store_true")
     args = parser.parse_args()
 
@@ -154,5 +164,8 @@ if __name__ == "__main__":
     betas = beta_function(Ts, popt[0], popt[1], popt[2])
     if args.plot:
         plot_beta(Ts, betas)
+
+    if args.cleanup:
+        cleanup(seedname)
 
 
