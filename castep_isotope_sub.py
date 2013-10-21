@@ -107,8 +107,11 @@ def run_and_report(seedname, fineqpoints=None):
     return (popt, pconv)
 
 
-def plot_beta(Ts, betas, names=None):
+def plot_beta(Ts, betas, names=None, filename=None):
 
+    import matplotlib
+    if filename is not None:
+        matplotlib.use('Agg')
     import matplotlib.pyplot as plt
 
     Tsm1 = 1E6/(Ts**2.0)
@@ -127,6 +130,9 @@ def plot_beta(Ts, betas, names=None):
     ax1.set_xlim(right=Tsm1.max())
     x1locs, x1labels = plt.xticks()
 
+    if names is not None:
+        plt.legend(loc=2)
+
     ax2 = ax1.twiny()
     ax2.set_xlabel("T (K)")
     x2vals = []
@@ -139,7 +145,11 @@ def plot_beta(Ts, betas, names=None):
             x2vals.append("{:4.0f}".format(thisval))
             x2locs.append(xloc)
     plt.xticks(x2locs, x2vals)
-    plt.show()
+
+    if filename is not None:
+        plt.savefig(filename)
+    else:
+        plt.show()
 
 def cleanup(seedname):
 
