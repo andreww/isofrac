@@ -52,15 +52,10 @@ def produce_dotcell(seedname, mass, fineqpoints=None):
     return()
 
 def run_phonons(seedname, fineqpoints=None):
-    """Does phonon calculation for seedname with 24Mg and 26Mg
-       and returns the frequencies and weights"""
-
+    """Does phonon calculation for seedname with 24Mg and 26Mg"""
+       
     phonons_path = "/share/apps/atomistic/CASTEP-6.11-serial/" + \
         "linux_x86_64_gfortran--serial/phonons"
-
-    if fineqpoints is not None:
-        print "phonon_fine_kpoint_mp_grid: {0[0]:d} {0[1]:d} {0[2]}".format(
-            fineqpoints)
 
     # Setup and run for light isotope
     produce_dotcell(seedname, "24Mg", fineqpoints)
@@ -71,6 +66,23 @@ def run_phonons(seedname, fineqpoints=None):
     produce_dotcell(seedname, "26Mg", fineqpoints)
     os.symlink(seedname+".param", seedname+"__isotope_h.param")
     subprocess.check_call([phonons_path, seedname+"__isotope_h"])
+
+
+def get_freqs(seedname, fineqpoints=None):
+    """After phonon calculation for seedname with 24Mg and 26Mg
+       returns the frequencies and weights"""
+
+    if (os.isfile(seedname+"__isotope_l.phonon") and
+        os.isfile(seedname+"__isotope_h.phonon")):
+        print "Reusing existing .phonon files"
+        if fineqpoints is not None:
+            "phonon_fine_kpoint_mp_grid ignored"
+    else:
+        # First, run phonons
+        if fineqpoints is not None:
+            print "phonon_fine_kpoint_mp_grid: {0[0]:d} {0[1]:d} {0[2]}".format(
+                fineqpoints)
+        run_phonons(seedname, fineqpoints)
 
     # Pull out the frequencies and weights
     v, w = calc_beta.read_frequences(seedname+"__isotope_l.phonon")
@@ -83,7 +95,7 @@ def run_phonons(seedname, fineqpoints=None):
 def fit_beta_func(seedname, fineqpoints=None):
 
     # Get betas for T = 300 - 4000
-    (v, w, vs, ws) = run_phonons(seedname, fineqpoints)
+    (v, w, vs, ws) = get_freqs(seedname, fineqpoints)
     Ts = np.linspace(300.0, 4000.0, num=4000)
     betas = calc_beta.beta_T(Ts, 1, v, vs, w, ws)
     lnbetas = 1000.0 * np.log(betas)
