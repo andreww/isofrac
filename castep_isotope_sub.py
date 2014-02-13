@@ -88,11 +88,20 @@ def fit_beta_func(seedname, fineqpoints=None):
     betas = calc_beta.beta_T(Ts, 1, v, vs, w, ws)
     lnbetas = 1000.0 * np.log(betas)
 
-    popt, pconv = spopt.curve_fit(beta_function, Ts, lnbetas, p0=[1E14, -1E10, 1E6])
-    return (popt, pconv)
+    # Fit to functional form for ln(beta)
+    popt, pconv = spopt.curve_fit(ln_beta_function, Ts, 
+        lnbetas, p0=[1E14, -1E10, 1E6])
+
+    # Check error so that caller can check value
+    calc_betas = ln_beta_function(Ts, popt[0], popt[1], popt[2])
+    error = np.abs(lnbetas-calc_betas)
+    max_error = np.max(error)
+
+    return (popt, pconv, max_error)
     
 
-def beta_function(T, A, B, C):
+def ln_beta_function(T, A, B, C):
+    "A function used to parameterise 1000.ln(beta(T))"
     b = A/T**6 + B/T**4 + C/T**2
     return b
 
@@ -100,9 +109,13 @@ def run_and_report(seedname, fineqpoints=None):
 
     print "Using 'Phonons' for frequency calculation "
     print "of 24Mg and 26 Mg substitution into {} ...\n".format(seedname)
-    popt, pconv = fit_beta_func(seedname, fineqpoints)
-    print "For function:\n   1000 ln(beta) = A/T^6 + B/T^4 + C/T^2"
-    print "parameters are: \n   A = {:7g} \n   B = {:7g} \n   C = {:7g}".format(popt[0], popt[1], popt[2])
+    popt, pconv, max_error = fit_beta_func(seedname, fineqpoints)
+    print "For function:\n  1000 ln(beta) = A/T^6 + B/T^4 + C/T^2"
+    print "parameters are: \n  A = {:7g} \n   B = {:7g} \n   C = {:7g}".format(
+                popt[0], popt[1], popt[2])
+    print "maximum error is: {:7g}".format(max_error)
+    # Convergence is to ~0.01 per mil, so worse than this is a problem
+    assert max_error < 0.01, ValueError
 
     return (popt, pconv)
 
@@ -181,11 +194,12 @@ if __name__ == "__main__":
     print "\n T(K)        1000 ln beta"
     print " -------------------------"
     for t in [300, 500, 1000, 2600, 3700]:
-        print " {:5f}     {:5f}".format(t, beta_function(t, popt[0], popt[1], popt[2]))
+        print " {:5f}     {:5f}".format(t, ln_beta_function(t, 
+                   popt[0], popt[1], popt[2]))
 
     # Plot output
     Ts = np.linspace(300.0, 4000.0, num=40)
-    betas = beta_function(Ts, popt[0], popt[1], popt[2])
+    betas = ln_beta_function(Ts, popt[0], popt[1], popt[2])
     if args.plot:
         plot_beta(Ts, betas)
 
