@@ -72,8 +72,8 @@ def get_freqs(seedname, fineqpoints=None):
     """After phonon calculation for seedname with 24Mg and 26Mg
        returns the frequencies and weights"""
 
-    if (os.isfile(seedname+"__isotope_l.phonon") and
-        os.isfile(seedname+"__isotope_h.phonon")):
+    if (os.path.isfile(seedname+"__isotope_l.phonon") and
+        os.path.isfile(seedname+"__isotope_h.phonon")):
         print "Reusing existing .phonon files"
         if fineqpoints is not None:
             "phonon_fine_kpoint_mp_grid ignored"
@@ -85,8 +85,8 @@ def get_freqs(seedname, fineqpoints=None):
         run_phonons(seedname, fineqpoints)
 
     # Pull out the frequencies and weights
-    v, w = calc_beta.read_frequences(seedname+"__isotope_l.phonon")
-    vs, ws = calc_beta.read_frequences(seedname+"__isotope_h.phonon")
+    v, w, vol = calc_beta.read_frequences(seedname+"__isotope_l.phonon")
+    vs, ws, vol = calc_beta.read_frequences(seedname+"__isotope_h.phonon")
 
     print "Total q-points: {0:d}\n".format(len(w))
 

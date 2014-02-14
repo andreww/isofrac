@@ -24,10 +24,13 @@ def read_frequences(filename):
 
     get_freq_weights_RE = re.compile(r"^\s+q-pt=\s+\d+\s+[\+\-]?\d+\.\d+\s+[\+\-]?\d+\.\d+\s+[\+\-]?\d+\.\d+\s+(\d+\.\d+)\s*$", re.MULTILINE)
 
+    get_lattice_vecs_RE = re.compile(r"^\s+Unit cell vectors \(A\)\n\s*(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s*\n\s*(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s*\n\s*(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)", re.MULTILINE)
+
     fh = open(filename, 'r')
     filelines = fh.read()
     freq_grps = get_freq_RE.findall(filelines)
     wgt_grps = get_freq_weights_RE.findall(filelines)
+    lvec_grps = get_lattice_vecs_RE.findall(filelines)[0]
     fh.close
     wgts = []
     for wgt in wgt_grps:
@@ -35,7 +38,13 @@ def read_frequences(filename):
     freqs = []
     for freq in freq_grps:
         freqs.append(float(freq))
-    return freqs, wgts
+
+    lvec = np.array([[str(lvec_grps[0]), str(lvec_grps[1]), str(lvec_grps[2])],
+                     [str(lvec_grps[3]), str(lvec_grps[4]), str(lvec_grps[5])],
+                     [str(lvec_grps[6]), str(lvec_grps[7]), str(lvec_grps[8])]]
+                    )
+    vol = np.linalg.det(lvec)
+    return freqs, wgts, vol
 
 def beta(T, N, freq, freqstar, wgt, wgtstar):
 
@@ -84,8 +93,8 @@ def beta_T(Ts, N, freq, freqstar, wgt, wgtstar):
 
 if __name__ == "__main__":
     import sys
-    v, w = read_frequences(sys.argv[1])
-    vs, ws = read_frequences(sys.argv[2])
+    v, w, vol = read_frequences(sys.argv[1])
+    vs, ws, vol = read_frequences(sys.argv[2])
 
     for T in [15, 30, 60, 120, 240, 300, 500, 670, 1000, 1500, 2000, 2500, 2600, 3000, 3500, 3700, 4000]:
         b = beta(T, 1, v, vs, w, ws)
