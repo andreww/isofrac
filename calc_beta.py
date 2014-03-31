@@ -39,9 +39,9 @@ def read_frequences(filename):
     for freq in freq_grps:
         freqs.append(float(freq))
 
-    lvec = np.array([[str(lvec_grps[0]), str(lvec_grps[1]), str(lvec_grps[2])],
-                     [str(lvec_grps[3]), str(lvec_grps[4]), str(lvec_grps[5])],
-                     [str(lvec_grps[6]), str(lvec_grps[7]), str(lvec_grps[8])]]
+    lvec = np.array([[float(lvec_grps[0]), float(lvec_grps[1]), float(lvec_grps[2])],
+                     [float(lvec_grps[3]), float(lvec_grps[4]), float(lvec_grps[5])],
+                     [float(lvec_grps[6]), float(lvec_grps[7]), float(lvec_grps[8])]]
                     )
     vol = np.linalg.det(lvec)
     return freqs, wgts, vol
