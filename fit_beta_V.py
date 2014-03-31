@@ -1,0 +1,154 @@
+#!/usr/bin/env python
+"""
+fit_beta_V
+
+Script to fit 1000.ln(beta(T,V). Assumes phonons
+tool has already been run in bulk.
+"""
+import os
+import re
+import glob
+import subprocess
+import numpy as np
+import scipy.optimize as spopt
+
+import calc_beta
+import castep_isotope_sub
+
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+get_volumes_RE = re.compile( r"^\s+Current cell volume =\s+(\d+\.\d+)\s+A\*\*3",
+        re.MULTILINE)
+
+def get_volume(seedname):
+    """Read the final cell volume from a .castep file
+
+    This can be used to plot e.g. beta as a function of
+    cell volume in cases where the volume in the .phonon
+    file does not represent the optimisesd structure. 
+    """
+    fh = open(seedname+".castep", "r")
+    lines = fh.read()
+    fh.close()
+    volume_grps = get_volumes_RE.findall(lines)
+    volume = float(volume_grps[-1]) # Last one is probably the optimized volume
+    return volume
+
+def fit_V_beta_func(data):
+
+    Ts = np.linspace(300.0, 4000.0, num=50)
+#        betas = calc_beta.beta_T(Ts, 1, v, vs, w, ws)
+    # Get betas for T = 300 - 4000
+
+    (v, w, vs, ws) = get_freqs(seedname, fineqpoints)
+    Ts = np.linspace(300.0, 4000.0, num=4000)
+    betas = calc_beta.beta_T(Ts, 1, v, vs, w, ws)
+    lnbetas = 1000.0 * np.log(betas)
+
+
+    # Check error so that caller can check value
+    calc_betas = ln_beta_function(Ts, popt[0], popt[1], popt[2])
+    error = np.abs(lnbetas-calc_betas)
+    max_error = np.max(error)
+
+    return (popt, pconv, max_error)
+
+def fit_beta_T_V(data):
+
+    Ts = np.linspace(500.0, 3500.0, num=50)
+    allTs = []
+    allVs = []
+    betas = []
+    for V in data.keys():
+        print V
+        (v, w, vs, ws) = data[V]
+        betas.extend(calc_beta.beta_T(Ts, 1, v, vs, w, ws))
+        allTs.extend(Ts)
+        allVs.extend(np.ones(np.size(Ts))*V)
+
+    TVs = np.array([allTs, allVs])
+    print TVs
+    betas = np.array(betas)
+    lnbetas = 1000.0 * np.log(betas)
+    # Fit to functional form for ln(beta)
+    popt, pconv = spopt.curve_fit(ln_beta_V_function, TVs, 
+        lnbetas, p0=[1E14, 1.7E16, 1E10, -1E10, -1E10, 1E10, 1E6, 5E6, 1E6])
+
+
+    print popt
+    # Check results...
+    calc_betas = ln_beta_V_function(TVs, popt[0], popt[1], popt[2],
+         popt[3], popt[4], popt[5], popt[6], popt[7], popt[8])
+    error = np.abs(lnbetas - calc_betas)
+    print "Maximum error for ln_beta_V_function"
+    print np.max(error)
+            
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(TVs[0], TVs[1], lnbetas)
+    ax.scatter(TVs[0], TVs[1], calc_betas, c='r')
+    plt.savefig('quick_look.png')
+
+    return betas, TVs
+    
+
+def ln_beta_V_function(TV, A1, A2, A3, B1, B2, B3, C1, C2, C3):
+    "A function used to parameterise 1000.ln(beta(T,V))"
+    b = (A1+A2/TV[1]+A3/TV[1]**2)/TV[0]**6 + \
+        (B1+B2/TV[1]+B3/TV[1]**2)/TV[0]**4 + \
+        (C1+C2/TV[1]+C3/TV[1]**2)/TV[0]**2
+    return b
+
+
+def run_and_report(seedname, fineqpoints=None):
+
+    print "Using 'Phonons' for frequency calculation "
+    print "of 24Mg and 26 Mg substitution into {} ...\n".format(seedname)
+    popt, pconv, max_error = fit_beta_func(seedname, fineqpoints)
+    print "For function:\n  1000 ln(beta) = A/T^6 + B/T^4 + C/T^2"
+    print "parameters are: \n  A = {:7g} \n   B = {:7g} \n   C = {:7g}".format(
+                popt[0], popt[1], popt[2])
+    print "maximum error is: {:7g}".format(max_error)
+    # Convergence is to ~0.01 per mil, so worse than this is a problem
+    assert max_error < 0.01, ValueError
+
+    return (popt, pconv)
+
+
+def get_data(paths_and_seeds):
+    """Return data from phonons runs
+
+       Data is returned as a dictionary indexed 
+       by cell volume, values are 4-tuples of arrays 
+       of frequencies and wights of the normal and 
+       heavy isotopes
+    """
+    old_dir = os.getcwd()
+    data = {}
+    for path, seedname in paths_and_seeds:
+        os.chdir(path)
+        print "Extracting data from {} in {}".format(seedname, path)
+        vol = get_volume(seedname)
+	(v, w, vs, ws) = castep_isotope_sub.get_freqs(seedname)
+        data[vol] = (v, w, vs, ws)
+        os.chdir(old_dir)
+    return data
+
+
+if __name__ == "__main__":
+    import argparse
+    import bulk_run_phonons
+    parser = argparse.ArgumentParser(description=
+        "Fit 1000.ln(beta(T,V)")
+    parser.add_argument('castep_files', nargs='+', action='store',
+                    metavar='Castep file', help='A list of .castep file paths')
+    args = parser.parse_args()
+
+    paths_and_seeds = bulk_run_phonons.process_paths(args.castep_files)
+
+    data = get_data(paths_and_seeds)
+        
+    fit_beta_T_V(data)
