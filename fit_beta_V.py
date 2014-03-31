@@ -58,41 +58,56 @@ def fit_V_beta_func(data):
 
 def fit_beta_T_V(data):
 
+    print "Fitting beta to T,V data"
     Ts = np.linspace(500.0, 3500.0, num=50)
     allTs = []
     allVs = []
     betas = []
     for V in data.keys():
-        print V
         (v, w, vs, ws) = data[V]
         betas.extend(calc_beta.beta_T(Ts, 1, v, vs, w, ws))
         allTs.extend(Ts)
         allVs.extend(np.ones(np.size(Ts))*V)
 
     TVs = np.array([allTs, allVs])
-    print TVs
     betas = np.array(betas)
     lnbetas = 1000.0 * np.log(betas)
     # Fit to functional form for ln(beta)
     popt, pconv = spopt.curve_fit(ln_beta_V_function, TVs, 
-        lnbetas, p0=[1E14, 1.7E16, 1E10, -1E10, -1E10, 1E10, 1E6, 5E6, 1E6])
+        lnbetas, p0=[1E14, 1.7E16, 0.0, -1E10, -1E10, 1E10, 1E6, 5E6, 1E6])
 
-
-    print popt
     # Check results...
     calc_betas = ln_beta_V_function(TVs, popt[0], popt[1], popt[2],
          popt[3], popt[4], popt[5], popt[6], popt[7], popt[8])
-    error = np.abs(lnbetas - calc_betas)
-    print "Maximum error for ln_beta_V_function"
-    print np.max(error)
-            
-    fig = plt.figure()
+    max_error = np.max(np.abs(lnbetas - calc_betas))
+    # Convergence is to ~0.05 per mil, so worse than this is a problem
+    assert max_error < 0.05, ValueError
+
+    print "For function:\n  1000 ln(beta) = " + \
+        "(A1+A2.V^-1+A3.V^-2)/T^6 + (B1+B2.V^-1+B3.V^-2)/T^4 + (C1+C2.V-1+C3.V-2)/T^2"
+    print "parameters are: \n  A1 = {:7g} \t   B1 = {:7g} \t   C1 = {:7g}".format(
+                popt[0], popt[3], popt[6])
+    print "  A2 = {:7g} \t   B2 = {:7g} \t   C2 = {:7g}".format(
+                popt[1], popt[4], popt[7])
+    print "  A3 = {:7g} \t   B3 = {:7g} \t   C3 = {:7g}".format(
+                popt[2], popt[5], popt[8])
+    print "maximum error is: {:7g}".format(max_error)
+
+    fig = plt.figure(figsize=(12.0,10.0), dpi=600)
     ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(TVs[0], TVs[1], lnbetas)
-    ax.scatter(TVs[0], TVs[1], calc_betas, c='r')
-    plt.savefig('quick_look.png')
+    ax.scatter(TVs[0], TVs[1], lnbetas, c='r')
+    ax.plot_trisurf(TVs[0], TVs[1], calc_betas, cmap=plt.get_cmap('Greens'))
+    ax.set_xlabel('Temperature (K)')
+    ax.set_ylabel('Volume (A$^3$)')
+    ax.set_zlabel(r'$1000.\ln(\beta)$ (per mill)')
+    ax.set_xlim(500, 3500)
+    plt.savefig('beta_V_T.png')
 
     return betas, TVs
+
+
+def ln_beta_V_function_wrap(T, V, A1, A2, A3, B1, B2, B3, C1, C2, C3):
+    return ln_beta_V_function([T, V], A1, A2, A3, B1, B2, B3, C1, C2, C3)
     
 
 def ln_beta_V_function(TV, A1, A2, A3, B1, B2, B3, C1, C2, C3):
