@@ -150,7 +150,7 @@ def get_data(paths_and_seeds):
         print "Extracting data from {} in {}".format(seedname, path)
         vol = get_volume(seedname)
         # For MgO we have a 2*2*2 primitive cell so 
-        vol = vol / 2.0
+        #vol = vol / 2.0
 	(v, w, vs, ws) = castep_isotope_sub.get_freqs(seedname)
         data[vol] = (v, w, vs, ws)
         os.chdir(old_dir)
@@ -171,12 +171,12 @@ if __name__ == "__main__":
     data = get_data(paths_and_seeds)
         
     A1, A2, A3, B1, B2, B3, C1, C2, C3 = fit_beta_T_V(data)
-    print 2500, 73.139, ln_beta_V_function_wrap(2600, 73.139, A1, A2, A3, B1, B2, B3, C1, C2, C3)
-    print 3200, 75.869, ln_beta_V_function_wrap(3200, 75.869, A1, A2, A3, B1, B2, B3, C1, C2, C3)
-    print 3000, 64.478, ln_beta_V_function_wrap(3000, 64.478, A1, A2, A3, B1, B2, B3, C1, C2, C3)
-    print 4000, 66.154, ln_beta_V_function_wrap(4000, 66.154, A1, A2, A3, B1, B2, B3, C1, C2, C3)
+    print 2500, 25, ln_beta_V_function_wrap(2600, 164.187, A1, A2, A3, B1, B2, B3, C1, C2, C3)
+    print 3200, 25, ln_beta_V_function_wrap(3200, 170.071, A1, A2, A3, B1, B2, B3, C1, C2, C3)
+    print 3000, 60, ln_beta_V_function_wrap(3000, 148.329, A1, A2, A3, B1, B2, B3, C1, C2, C3)
+    print 4000, 60, ln_beta_V_function_wrap(4000, 151.648, A1, A2, A3, B1, B2, B3, C1, C2, C3)
     print 
-    print 2500, 68.520, ln_beta_V_function_wrap(2600, 68.520, A1, A2, A3, B1, B2, B3, C1, C2, C3)
-    print 3200, 68.520, ln_beta_V_function_wrap(3200, 68.520, A1, A2, A3, B1, B2, B3, C1, C2, C3)
-    print 3000, 61.134, ln_beta_V_function_wrap(3000, 61.134, A1, A2, A3, B1, B2, B3, C1, C2, C3)
-    print 4000, 61.134, ln_beta_V_function_wrap(4000, 61.134, A1, A2, A3, B1, B2, B3, C1, C2, C3)
+    print 2500, 25, ln_beta_V_function_wrap(2600, 154.720, A1, A2, A3, B1, B2, B3, C1, C2, C3)
+    print 3200, 25, ln_beta_V_function_wrap(3200, 154.720, A1, A2, A3, B1, B2, B3, C1, C2, C3)
+    print 3000, 60, ln_beta_V_function_wrap(3000, 141.208, A1, A2, A3, B1, B2, B3, C1, C2, C3)
+    print 4000, 60, ln_beta_V_function_wrap(4000, 141.208, A1, A2, A3, B1, B2, B3, C1, C2, C3)
