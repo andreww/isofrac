@@ -74,14 +74,12 @@ def fit_beta_T_V(data):
     lnbetas = 1000.0 * np.log(betas)
     # Fit to functional form for ln(beta)
     popt, pconv = spopt.curve_fit(ln_beta_V_function, TVs, 
-        lnbetas, p0=[1E14, 1.7E16, 0.0, -1E10, -1E10, 1E10, 1E6, 5E6, 1E6])
+        lnbetas, p0=[1E14, 1.7E16, 0, -1E10, -1E10, 1E10, 1E6, 5E6, 1E6])
 
     # Check results...
     calc_betas = ln_beta_V_function(TVs, popt[0], popt[1], popt[2],
          popt[3], popt[4], popt[5], popt[6], popt[7], popt[8])
     max_error = np.max(np.abs(lnbetas - calc_betas))
-    # Convergence is to ~0.05 per mil, so worse than this is a problem
-    assert max_error < 0.05, ValueError
 
     print "For function:\n  1000 ln(beta) = " + \
         "(A1+A2.V^-1+A3.V^-2)/T^6 + (B1+B2.V^-1+B3.V^-2)/T^4 + (C1+C2.V-1+C3.V-2)/T^2"
@@ -102,6 +100,9 @@ def fit_beta_T_V(data):
     ax.set_zlabel(r'$1000.\ln(\beta)$ (per mill)')
     ax.set_xlim(500, 3500)
     plt.savefig('beta_V_T.png')
+
+    # Convergence is to ~0.05 per mil, so worse than this is a problem
+    assert max_error < 0.06, ValueError
 
     return betas, TVs
 
