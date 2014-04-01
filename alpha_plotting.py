@@ -11,20 +11,20 @@ def plot_alpha(Ts, betas_ref, betas_plot, name_ref, names_plot):
 
     fix, ax1 = plt.subplots()
 
-    styles = ['b--', 'b-', 'g--', 'g-', 'r--', 'r-']
+    styles = ['r--', 'r-', 'b--', 'b-', 'g--', 'g-']
     i = 0
 
     for pressure, beta_ref in betas_ref.iteritems(): 
         for bet_plot, name_plot in zip(betas_plot[pressure], names_plot[pressure]):
             alpha = beta_ref - bet_plot
-            ax1.plot(Ts, alpha, styles[i], label=name_plot)
+            ax1.plot(Ts, alpha, styles[i], label=name_plot + str(pressure))
             i = i + 1
 
-    ax1.set_ylabel("1000 * ln alpha (per mill) relative to {}".format(name_ref))
+    ax1.set_ylabel(r"$1000.\ln(\alpha)$ (per mill) relative to {}".format(name_ref))
     ax1.set_xlabel("T (K)")
-    # plt.legend()
-    # plt.show()
-    plt.savefig('alpha.svg')
+    #plt.legend()
+    #plt.show()
+    plt.savefig('alpha.eps')
 
 
 if __name__ == "__main__":
@@ -46,7 +46,7 @@ if __name__ == "__main__":
        A = float(raw_input("A parameter of reference: "))
        B = float(raw_input("B parameter of reference: "))
        C = float(raw_input("C parameter of reference: "))
-       betas_ref[pressure] = castep_isotope_sub.beta_function(Ts, A, B, C)
+       betas_ref[pressure] = castep_isotope_sub.ln_beta_function(Ts, A, B, C)
 
     Pdone = False
     while not Pdone:
@@ -67,7 +67,7 @@ if __name__ == "__main__":
             B = float(raw_input("B parameter: "))
             C = float(raw_input("C parameter: "))
             names.append(name)
-            betas.append(castep_isotope_sub.beta_function(Ts, A, B, C))
+            betas.append(castep_isotope_sub.ln_beta_function(Ts, A, B, C))
         betas_p_names[pressure] = names
         betas_p[pressure] = betas
 

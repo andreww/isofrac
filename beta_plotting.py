@@ -14,7 +14,7 @@ if __name__ == "__main__":
 
 
     names = []
-    Ts = np.linspace(300.0, 4000.0, num=40)
+    Ts = np.concatenate((np.linspace(300.0, 500.0, num=40), np.linspace(501.0, 4000.0, num=40)))
     betas = []
 
     done = False
@@ -28,6 +28,6 @@ if __name__ == "__main__":
            B = float(raw_input("B parameter: "))
            C = float(raw_input("C parameter: "))
            names.append(name)
-           betas.append(castep_isotope_sub.beta_function(Ts, A, B, C))
+           betas.append(castep_isotope_sub.ln_beta_function(Ts, A, B, C))
 
     castep_isotope_sub.plot_beta(Ts, betas, names, filename=args.filename) 

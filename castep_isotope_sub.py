@@ -149,8 +149,8 @@ def plot_beta(Ts, betas, names=None, filename=None):
                 ax1.plot(Tsm1, beta, label=name)
     else:
         ax1.plot(Tsm1, betas, "b-")
-    ax1.set_ylabel("1000 * ln beta (per mill)")
-    ax1.set_xlabel("1000000 / T^2 (1^6 K^-2)")
+    ax1.set_ylabel(r"$1000.\ln(\beta)$ (per mill)")
+    ax1.set_xlabel("$1000000 / T^2$ ($10^6$ K$^{-2}$)")
     ax1.set_xlim(right=Tsm1.max())
     x1locs, x1labels = plt.xticks()
 
