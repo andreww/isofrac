@@ -15,10 +15,6 @@ import scipy.optimize as spopt
 import calc_beta
 import castep_isotope_sub
 
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 
 get_volumes_RE = re.compile( r"^\s+Current cell volume =\s+(\d+\.\d+)\s+A\*\*3",
         re.MULTILINE)
@@ -56,7 +52,7 @@ def fit_V_beta_func(data):
 
     return (popt, pconv, max_error)
 
-def fit_beta_T_V(data):
+def fit_beta_T_V(data, plot=True):
 
     print "Fitting beta to T,V data"
     Ts = np.linspace(500.0, 3500.0, num=50)
@@ -91,15 +87,16 @@ def fit_beta_T_V(data):
                 popt[2], popt[5], popt[8])
     print "maximum error is: {:7g}".format(max_error)
 
-    fig = plt.figure(figsize=(12.0,10.0), dpi=600)
-    ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(TVs[0], TVs[1], lnbetas, c='r')
-    ax.plot_trisurf(TVs[0], TVs[1], calc_betas, cmap=plt.get_cmap('Greens'))
-    ax.set_xlabel('Temperature (K)')
-    ax.set_ylabel('Volume (A$^3$)')
-    ax.set_zlabel(r'$1000.\ln(\beta)$ (per mill)')
-    ax.set_xlim(500, 3500)
-    plt.savefig('beta_V_T.png')
+    if plot:
+        fig = plt.figure(figsize=(12.0,10.0), dpi=600)
+        ax = fig.add_subplot(111, projection='3d')
+        ax.scatter(TVs[0], TVs[1], lnbetas, c='r')
+        ax.plot_trisurf(TVs[0], TVs[1], calc_betas, cmap=plt.get_cmap('Greens'))
+        ax.set_xlabel('Temperature (K)')
+        ax.set_ylabel('Volume (A$^3$)')
+        ax.set_zlabel(r'$1000.\ln(\beta)$ (per mill)')
+        ax.set_xlim(500, 3500)
+        plt.savefig('beta_V_T.png')
 
     # Convergence is to ~0.05 per mil, so worse than this is a problem
     assert max_error < 0.06, ValueError
@@ -135,7 +132,7 @@ def run_and_report(seedname, fineqpoints=None):
     return (popt, pconv)
 
 
-def get_data(paths_and_seeds):
+def get_data(paths_and_seeds, supercell=False):
     """Return data from phonons runs
 
        Data is returned as a dictionary indexed 
@@ -149,8 +146,9 @@ def get_data(paths_and_seeds):
         os.chdir(path)
         print "Extracting data from {} in {}".format(seedname, path)
         vol = get_volume(seedname)
-        # For MgO we have a 2*2*2 primitive cell so 
-        #vol = vol / 2.0
+        if supercell:
+            # For MgO we have a 2*2*2 primitive cell so 
+            vol = vol / 2.0
 	(v, w, vs, ws) = castep_isotope_sub.get_freqs(seedname)
         data[vol] = (v, w, vs, ws)
         os.chdir(old_dir)
@@ -158,6 +156,10 @@ def get_data(paths_and_seeds):
 
 
 if __name__ == "__main__":
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    from mpl_toolkits.mplot3d import Axes3D
     import argparse
     import bulk_run_phonons
     parser = argparse.ArgumentParser(description=
