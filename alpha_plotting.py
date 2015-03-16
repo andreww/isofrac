@@ -11,7 +11,7 @@ def plot_alpha(Ts, betas_ref, betas_plot, name_ref, names_plot):
 
     fix, ax1 = plt.subplots()
 
-    styles = ['r--', 'r-', 'b--', 'b-', 'g--', 'g-']
+    styles = ['b--', 'b-', 'r--', 'r-', 'g--', 'g-']
     i = 0
 
     for pressure, beta_ref in betas_ref.iteritems(): 
@@ -24,7 +24,7 @@ def plot_alpha(Ts, betas_ref, betas_plot, name_ref, names_plot):
     ax1.set_xlabel("T (K)")
     #plt.legend()
     #plt.show()
-    plt.savefig('alpha.eps')
+    plt.savefig('alpha2.eps')
 
 
 if __name__ == "__main__":
