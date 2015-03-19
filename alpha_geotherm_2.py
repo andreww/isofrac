@@ -78,7 +78,7 @@ if __name__ == "__main__":
     import matplotlib.pyplot as plt
 
     # Depth range of interest
-    depths = np.linspace(0.0, 1400.0, num=15)
+    depths = np.linspace(0.0, 1400.0, num=200)
 
     # Get our list of Ps and Ts
     Ts, Ps = depth_PT(depths)
@@ -125,7 +125,7 @@ if __name__ == "__main__":
     print "Done fitting... now plotting" 
 
     f, ax1 = plt.subplots()
-    ax1.set_xlabel(r"$1000.\ln(\alpha)$ (per mill) relative to Mg$_2$SiO$_4$")
+    ax1.set_xlabel(r"$\Delta^{}$Mg (per mill) relative to forsterite".format('{26}'))
     ax1.set_ylabel("Depth (km)")
     ax1.invert_yaxis()
     ax1.plot((Mg2SiO4_betas_athermal - MgO_betas_athermal), depths, 'b--')
@@ -135,7 +135,7 @@ if __name__ == "__main__":
 
     #ax2 = ax1.twinx()
     #ax2_tick_ds = [200, 400, 600, 800, 1000]
-    ##ax2_tick_Ps, ax2_tick_Ts = depth_PT(ax2_tick_ds)
+    #ax2_tick_Ps, ax2_tick_Ts = depth_PT(ax2_tick_ds)
     #ax2_tick_labs = ["200", "400", "600", "800", "1000"]
     #ax2.set_ylabel("P (GPa)")
     #ax2.set_yticks(ax2_tick_ds)

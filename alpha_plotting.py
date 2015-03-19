@@ -20,11 +20,11 @@ def plot_alpha(Ts, betas_ref, betas_plot, name_ref, names_plot):
             ax1.plot(Ts, alpha, styles[i], label=name_plot + str(pressure))
             i = i + 1
 
-    ax1.set_ylabel(r"$1000.\ln(\alpha)$ (per mill) relative to {}".format(name_ref))
+    ax1.set_ylabel(r"$\Delta^{}$Mg (per mill) relative to {}".format('{26}', name_ref))
     ax1.set_xlabel("T (K)")
     #plt.legend()
     #plt.show()
-    plt.savefig('alpha2.eps')
+    plt.savefig('alpha3.eps')
 
 
 if __name__ == "__main__":

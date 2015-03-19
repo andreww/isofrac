@@ -146,7 +146,7 @@ if __name__ == "__main__":
     ax3.plot((Mg2SiO4_betas - MgO_betas), Ps, 'b-')
     ax3.plot((Mg2SiO4_betas_athermal - MgSiO3_betas_athermal), Ps, 'r--')
     ax3.plot((Mg2SiO4_betas - MgSiO3_betas), Ps, 'r-')
-    ax3.set_xlabel(r'$1000.\ln(\alpha)$ (per mill) relative to Mg$_2$SiO$_4$')
+    ax3.set_xlabel(r'$\Delta ^{}$Mg (per mill) relative to forsterite'.format('{26}'))
 
 
     plt.show()
