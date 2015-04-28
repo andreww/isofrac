@@ -116,6 +116,12 @@ def ln_beta_function(T, A, B, C):
     b = A/T**6 + B/T**4 + C/T**2
     return b
 
+def wu_ln_beta_function(T, A, B, C):
+    "A function used to parameterise 1000.ln(beta(T))"
+    x = (1E6/T**2)
+    b = A + B*x + C*x**2
+    return b
+
 def run_and_report(seedname, fineqpoints=None):
 
     print "Using 'Phonons' for frequency calculation "
@@ -131,7 +137,8 @@ def run_and_report(seedname, fineqpoints=None):
     return (popt, pconv)
 
 
-def plot_beta(Ts, betas, names=None, filename=None):
+def plot_beta(Ts, betas, names=None, styles=None, colors=None, 
+     filename=None):
 
     import matplotlib
     if filename is not None:
@@ -141,12 +148,17 @@ def plot_beta(Ts, betas, names=None, filename=None):
     Tsm1 = 1E6/(Ts**2.0)
     fix, ax1 = plt.subplots()
     if type(betas) is list or type(betas) is tuple:
-        if names is None:
+        if (names is None) and (styles is None):
             for beta in betas:
                 ax1.plot(Tsm1, beta)
-        else:
+        elif styles is None:
             for beta, name in zip(betas, names):
                 ax1.plot(Tsm1, beta, label=name)
+        else:
+            for beta, name, style, color in zip(betas, names,
+                                                styles, colors):
+                ax1.plot(Tsm1, beta, label=name, linestyle=style, 
+                         color=color)
     else:
         ax1.plot(Tsm1, betas, "b-")
     ax1.set_ylabel(r"$1000.\ln(\beta)$ (per mill)")
