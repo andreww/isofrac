@@ -54,7 +54,7 @@ def fit_V_beta_func(data):
 
 def fit_beta_T_V(data, plot=True):
 
-    print "Fitting beta to T,V data"
+    print("Fitting beta to T,V data")
     Ts = np.linspace(500.0, 3500.0, num=50)
     allTs = []
     allVs = []
@@ -77,15 +77,15 @@ def fit_beta_T_V(data, plot=True):
          popt[3], popt[4], popt[5], popt[6], popt[7], popt[8])
     max_error = np.max(np.abs(lnbetas - calc_betas))
 
-    print "For function:\n  1000 ln(beta) = " + \
-        "(A1+A2.V^-1+A3.V^-2)/T^6 + (B1+B2.V^-1+B3.V^-2)/T^4 + (C1+C2.V-1+C3.V-2)/T^2"
-    print "parameters are: \n  A1 = {:7g} \t   B1 = {:7g} \t   C1 = {:7g}".format(
-                popt[0], popt[3], popt[6])
-    print "  A2 = {:7g} \t   B2 = {:7g} \t   C2 = {:7g}".format(
-                popt[1], popt[4], popt[7])
-    print "  A3 = {:7g} \t   B3 = {:7g} \t   C3 = {:7g}".format(
-                popt[2], popt[5], popt[8])
-    print "maximum error is: {:7g}".format(max_error)
+    print("For function:\n  1000 ln(beta) = " + \
+        "(A1+A2.V^-1+A3.V^-2)/T^6 + (B1+B2.V^-1+B3.V^-2)/T^4 + (C1+C2.V-1+C3.V-2)/T^2")
+    print("parameters are: \n  A1 = {:7g} \t   B1 = {:7g} \t   C1 = {:7g}".format(
+                popt[0], popt[3], popt[6]))
+    print("  A2 = {:7g} \t   B2 = {:7g} \t   C2 = {:7g}".format(
+                popt[1], popt[4], popt[7]))
+    print("  A3 = {:7g} \t   B3 = {:7g} \t   C3 = {:7g}".format(
+                popt[2], popt[5], popt[8]))
+    print("maximum error is: {:7g}".format(max_error))
 
     if plot:
         fig = plt.figure(figsize=(12.0,10.0), dpi=600)
@@ -119,13 +119,13 @@ def ln_beta_V_function(TV, A1, A2, A3, B1, B2, B3, C1, C2, C3):
 
 def run_and_report(seedname, fineqpoints=None):
 
-    print "Using 'Phonons' for frequency calculation "
-    print "of 24Mg and 26 Mg substitution into {} ...\n".format(seedname)
+    print("Using 'Phonons' for frequency calculation ")
+    print("of 24Mg and 26 Mg substitution into {} ...\n".format(seedname))
     popt, pconv, max_error = fit_beta_func(seedname, fineqpoints)
-    print "For function:\n  1000 ln(beta) = A/T^6 + B/T^4 + C/T^2"
-    print "parameters are: \n  A = {:7g} \n   B = {:7g} \n   C = {:7g}".format(
-                popt[0], popt[1], popt[2])
-    print "maximum error is: {:7g}".format(max_error)
+    print("For function:\n  1000 ln(beta) = A/T^6 + B/T^4 + C/T^2")
+    print("parameters are: \n  A = {:7g} \n   B = {:7g} \n   C = {:7g}".format(
+                popt[0], popt[1], popt[2]))
+    print("maximum error is: {:7g}".format(max_error))
     # Convergence is to ~0.01 per mil, so worse than this is a problem
     assert max_error < 0.01, ValueError
 
@@ -144,12 +144,12 @@ def get_data(paths_and_seeds, supercell=False):
     data = {}
     for path, seedname in paths_and_seeds:
         os.chdir(path)
-        print "Extracting data from {} in {}".format(seedname, path)
+        print("Extracting data from {} in {}".format(seedname, path))
         vol = get_volume(seedname)
         if supercell:
             # For MgO we have a 2*2*2 primitive cell so 
             vol = vol / 2.0
-	(v, w, vs, ws) = castep_isotope_sub.get_freqs(seedname)
+        (v, w, vs, ws) = castep_isotope_sub.get_freqs(seedname)
         data[vol] = (v, w, vs, ws)
         os.chdir(old_dir)
     return data
@@ -173,12 +173,11 @@ if __name__ == "__main__":
     data = get_data(paths_and_seeds)
         
     A1, A2, A3, B1, B2, B3, C1, C2, C3 = fit_beta_T_V(data)
-    print 2500, 25, ln_beta_V_function_wrap(2600, 272.331, A1, A2, A3, B1, B2, B3, C1, C2, C3)
-    print 3200, 25, ln_beta_V_function_wrap(3200, 280.110, A1, A2, A3, B1, B2, B3, C1, C2, C3)
-    print 3000, 60, ln_beta_V_function_wrap(3000, 237.137, A1, A2, A3, B1, B2, B3, C1, C2, C3)
-    print 4000, 60, ln_beta_V_function_wrap(4000, 241.042, A1, A2, A3, B1, B2, B3, C1, C2, C3)
-    print 
-    print 2500, 25, ln_beta_V_function_wrap(2600, 259.405506654, A1, A2, A3, B1, B2, B3, C1, C2, C3)
-    print 3200, 25, ln_beta_V_function_wrap(3200, 259.405506654, A1, A2, A3, B1, B2, B3, C1, C2, C3)
-    print 3000, 60, ln_beta_V_function_wrap(3000, 228.45872272, A1, A2, A3, B1, B2, B3, C1, C2, C3)
-    print 4000, 60, ln_beta_V_function_wrap(4000, 228.45872272, A1, A2, A3, B1, B2, B3, C1, C2, C3)
+    print(2500, 25, ln_beta_V_function_wrap(2600, 272.331, A1, A2, A3, B1, B2, B3, C1, C2, C3))
+    print(3200, 25, ln_beta_V_function_wrap(3200, 280.110, A1, A2, A3, B1, B2, B3, C1, C2, C3))
+    print(3000, 60, ln_beta_V_function_wrap(3000, 237.137, A1, A2, A3, B1, B2, B3, C1, C2, C3))
+    print(4000, 60, ln_beta_V_function_wrap(4000, 241.042, A1, A2, A3, B1, B2, B3, C1, C2, C3))
+    print(2500, 25, ln_beta_V_function_wrap(2600, 259.405506654, A1, A2, A3, B1, B2, B3, C1, C2, C3))
+    print(3200, 25, ln_beta_V_function_wrap(3200, 259.405506654, A1, A2, A3, B1, B2, B3, C1, C2, C3))
+    print(3000, 60, ln_beta_V_function_wrap(3000, 228.45872272, A1, A2, A3, B1, B2, B3, C1, C2, C3))
+    print(4000, 60, ln_beta_V_function_wrap(4000, 228.45872272, A1, A2, A3, B1, B2, B3, C1, C2, C3))
