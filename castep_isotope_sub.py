@@ -73,21 +73,21 @@ def get_freqs(seedname, fineqpoints=None):
 
     if (os.path.isfile(seedname+"__isotope_l.phonon") and
         os.path.isfile(seedname+"__isotope_h.phonon")):
-        print "Reusing existing .phonon files"
+        print("Reusing existing .phonon files")
         if fineqpoints is not None:
             "phonon_fine_kpoint_mp_grid ignored"
     else:
         # First, run phonons
         if fineqpoints is not None:
-            print "phonon_fine_kpoint_mp_grid: {0[0]:d} {0[1]:d} {0[2]}".format(
-                fineqpoints)
+            print("phonon_fine_kpoint_mp_grid: {0[0]:d} {0[1]:d} {0[2]}".format(
+                fineqpoints))
         run_phonons(seedname, fineqpoints)
 
     # Pull out the frequencies and weights
     v, w, vol = calc_beta.read_frequences(seedname+"__isotope_l.phonon")
     vs, ws, vol = calc_beta.read_frequences(seedname+"__isotope_h.phonon")
 
-    print "Total q-points: {0:d}\n".format(len(w))
+    print("Total q-points: {0:d}\n".format(len(w)))
 
     return(v, w, vs, ws)
 
@@ -124,13 +124,13 @@ def wu_ln_beta_function(T, A, B, C):
 
 def run_and_report(seedname, fineqpoints=None):
 
-    print "Using 'Phonons' for frequency calculation "
-    print "of 24Mg and 26 Mg substitution into {} ...\n".format(seedname)
+    print("Using 'Phonons' for frequency calculation ")
+    print("of 24Mg and 26 Mg substitution into {} ...\n".format(seedname))
     popt, pconv, max_error = fit_beta_func(seedname, fineqpoints)
-    print "For function:\n  1000 ln(beta) = A/T^6 + B/T^4 + C/T^2"
-    print "parameters are: \n  A = {:7g} \n   B = {:7g} \n   C = {:7g}".format(
-                popt[0], popt[1], popt[2])
-    print "maximum error is: {:7g}".format(max_error)
+    print("For function:\n  1000 ln(beta) = A/T^6 + B/T^4 + C/T^2")
+    print("parameters are: \n  A = {:7g} \n   B = {:7g} \n   C = {:7g}".format(
+                popt[0], popt[1], popt[2]))
+    print("maximum error is: {:7g}".format(max_error))
     # Convergence is to ~0.01 per mil, so worse than this is a problem
     assert max_error < 0.02, ValueError
 
@@ -189,7 +189,7 @@ def plot_beta(Ts, betas, names=None, styles=None, colors=None,
 
 def cleanup(seedname):
 
-    print "Cleaning up..."
+    print("Cleaning up...")
     for file in glob.glob(seedname + "__isotope_h.*") + \
             glob.glob(seedname + "__isotope_l.*"):
         os.unlink(file)
@@ -210,15 +210,15 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     seedname = args.seedname
-    print "\nCalculation of reduced partition function"
-    print "=========================================\n"
+    print("\nCalculation of reduced partition function")
+    print("=========================================\n")
     (popt, pconv) = run_and_report(seedname, fineqpoints=args.fineqpoints)
     # Tabulate output
-    print "\n T(K)        1000 ln beta"
-    print " -------------------------"
+    print("\n T(K)        1000 ln beta")
+    print(" -------------------------")
     for t in [300, 500, 1000, 2600, 3700]:
-        print " {:5f}     {:5f}".format(t, ln_beta_function(t, 
-                   popt[0], popt[1], popt[2]))
+        print(" {:5f}     {:5f}".format(t, ln_beta_function(t, 
+                   popt[0], popt[1], popt[2])))
 
     # Plot output
     Ts = np.linspace(300.0, 4000.0, num=40)

@@ -29,7 +29,7 @@ def walk_cleanup(paths_and_seeds):
     old_dir = os.getcwd()
     for path, seedname in paths_and_seeds:
         os.chdir(path)
-        print "Cleaning up {} isotope calculations in {}".format(seedname, path)
+        print("Cleaning up {} isotope calculations in {}".format(seedname, path))
         castep_isotope_sub.cleanup(seedname)
         os.chdir(old_dir)
 
@@ -38,7 +38,7 @@ def walk_phonons(paths_and_seeds):
     old_dir = os.getcwd()
     for path, seedname in paths_and_seeds:
         os.chdir(path)
-        print "Running phonons for {} in {}".format(seedname, path)
+        print("Running phonons for {} in {}".format(seedname, path))
         castep_isotope_sub.run_phonons(seedname)
         os.chdir(old_dir)
 

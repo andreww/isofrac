@@ -98,12 +98,12 @@ if __name__ == "__main__":
 
     for T in [15, 30, 60, 120, 240, 300, 500, 670, 1000, 1500, 2000, 2500, 2600, 3000, 3500, 3700, 4000]:
         b = beta(T, 1, v, vs, w, ws)
-        print T, b, m.log(b)*1E3
+        print(T, b, m.log(b)*1E3)
         
 
     # Or, the 'vectorised' version...
     Ts = np.array([15.0, 30.0, 60.0, 120.0, 240.0, 300.0, 500.0, 670.0, 1000.0, 1500.0, 2000.0, 2500.0, 2600.0, 3000.0, 3500.0, 3700.0, 4000.0])
     betas = beta_T(Ts, 1, v, vs, w, ws)
-    print Ts
-    print betas
-    print np.log(betas)*1E3
+    print(Ts)
+    print(betas)
+    print(np.log(betas)*1E3)

@@ -144,13 +144,14 @@ if __name__ == "__main__":
     ax2.set_ylabel("Depth (km)", fontsize=fs)
     ax2.tick_params(axis='both', which='both', labelsize=fs_l)
     ax3 = ax2.twiny()
-    ax3.set_xlabel(r"$\Delta^{}$Mg (per mill) relative to forsterite".format('{26}'), fontsize=fs)
-    ax3.set_xlim(left=0.0, right=0.12)
+    # For Tim's latest we want Mg25 - aparantly half the fractionation
+    ax3.set_xlabel(r"$\Delta^{}$Mg (per mill) relative to forsterite".format('{25}'), fontsize=fs)
+    ax3.set_xlim(left=0.0, right=0.12/2.0)
     ax3.tick_params(axis='both', which='both', labelsize=fs_l)
     # ax1.plot((Mg2SiO4_betas_athermal - MgO_betas_athermal), depths, 'b--')
     # ax1.plot((Mg2SiO4_betas - MgO_betas), depths, 'b-')
     # ax1.plot((Mg2SiO4_betas_athermal - MgSiO3_betas_athermal), depths, 'r--')
-    ax3.plot((Mg2SiO4_betas - MgSiO3_betas), depths, 'r-')
+    ax3.plot((Mg2SiO4_betas - MgSiO3_betas)/2.0, depths, 'r-')
 
     #ax2 = ax1.twinx()
     #ax2_tick_ds = np.array([200, 400, 600, 800, 1000])
