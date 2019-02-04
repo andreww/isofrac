@@ -54,7 +54,8 @@ def produce_dotcell(seedname, mass, fineqpoints=None):
 def run_phonons(seedname, fineqpoints=None):
     """Does phonon calculation for seedname with 24Mg and 26Mg"""
        
-    phonons_path = "/nfs/see-fs-02_users/earawa/lvs/Code/castep/CASTEP-6.11/bin/linux_x86_64_ifort12/phonons_AMW"
+    # phonons_path = "/nfs/see-fs-02_users/earawa/lvs/Code/castep/CASTEP-6.11/bin/linux_x86_64_ifort12/phonons_AMW"
+    phonons_path = "/nfs/see-fs-02_users/earawa/lvs/Code/castep/CASTEP-16.11/bin/linux_x86_64_ifort13--serial/phonons"
 
     # Setup and run for light isotope
     produce_dotcell(seedname, "24Mg", fineqpoints)
