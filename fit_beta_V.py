@@ -8,6 +8,7 @@ tool has already been run in bulk.
 import os
 import re
 import glob
+import warnings
 import subprocess
 import numpy as np
 import scipy.optimize as spopt
@@ -99,7 +100,8 @@ def fit_beta_T_V(data, plot=True):
         plt.savefig('beta_V_T.png')
 
     # Convergence is to ~0.05 per mil, so worse than this is a problem
-    assert max_error < 0.06, ValueError
+    if max_error >= 0.05:
+        warnings.warn("Fit does not reproduce data to better than 0.05 per mil!")
 
     return popt[0], popt[1], popt[2], popt[3], popt[4], \
            popt[5], popt[6], popt[7], popt[8]
