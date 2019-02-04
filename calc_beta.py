@@ -57,7 +57,7 @@ def beta(T, N, freq, freqstar, wgt, wgtstar):
     assert wgt == wgtstar
  
     N_qpt = len(wgt) 
-    N_fr = len(freq)/N_qpt
+    N_fr = len(freq)//N_qpt
     i = 0
     beta = 1.0
     for Nqwt in wgt:
