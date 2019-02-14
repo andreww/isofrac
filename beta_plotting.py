@@ -23,27 +23,27 @@ if __name__ == "__main__":
 
     done = False
     while not done:
-       name = raw_input("Enter name (empty string when done): ")
+       name = input("Enter name (empty string when done): ")
        if name == "":
            done = True
            next
        elif name[0] =="*":
            name = name[1:]
            if args.linestyle:
-               colors.append(raw_input("Color:"))
-               styles.append(raw_input("Style:"))
-           A = float(raw_input("Wu A parameter: "))
-           B = float(raw_input("Wu B parameter: "))
-           C = float(raw_input("Wu C parameter: "))
+               colors.append(input("Color:"))
+               styles.append(input("Style:"))
+           A = float(input("Wu A parameter: "))
+           B = float(input("Wu B parameter: "))
+           C = float(input("Wu C parameter: "))
            names.append(name)
            betas.append(castep_isotope_sub.wu_ln_beta_function(Ts, A, B, C))
        else:
            if args.linestyle:
-               colors.append(raw_input("Color:"))
-               styles.append(raw_input("Style:"))
-           A = float(raw_input("A parameter: "))
-           B = float(raw_input("B parameter: "))
-           C = float(raw_input("C parameter: "))
+               colors.append(input("Color:"))
+               styles.append(input("Style:"))
+           A = float(input("A parameter: "))
+           B = float(input("B parameter: "))
+           C = float(input("C parameter: "))
            names.append(name)
            betas.append(castep_isotope_sub.ln_beta_function(Ts, A, B, C))
 

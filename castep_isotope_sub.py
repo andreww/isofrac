@@ -8,6 +8,7 @@ and fit the results
 import os
 import glob
 import subprocess
+import warnings
 import numpy as np
 import scipy.optimize as spopt
 
@@ -133,7 +134,9 @@ def run_and_report(seedname, fineqpoints=None):
                 popt[0], popt[1], popt[2]))
     print("maximum error is: {:7g}".format(max_error))
     # Convergence is to ~0.01 per mil, so worse than this is a problem
-    assert max_error < 0.02, ValueError
+    if max_error > 0.02:
+        warnings.warn("max error > 0.02")
+        print("max error > 0.02")
 
     return (popt, pconv)
 

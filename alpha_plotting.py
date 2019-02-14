@@ -11,10 +11,10 @@ def plot_alpha(Ts, betas_ref, betas_plot, name_ref, names_plot):
 
     fix, ax1 = plt.subplots()
 
-    styles = ['b--', 'b-', 'r--', 'r-', 'g--', 'g-']
+    styles = ['k--', 'k-', 'g--', 'g-', 'b--', 'b-', 'r--', 'r-']
     i = 0
 
-    for pressure, beta_ref in betas_ref.iteritems(): 
+    for pressure, beta_ref in betas_ref.items(): 
         for bet_plot, name_plot in zip(betas_plot[pressure], names_plot[pressure]):
             alpha = beta_ref - bet_plot
             ax1.plot(Ts, alpha, styles[i], label=name_plot + str(pressure))
@@ -24,7 +24,7 @@ def plot_alpha(Ts, betas_ref, betas_plot, name_ref, names_plot):
     ax1.set_xlabel("T (K)")
     #plt.legend()
     #plt.show()
-    plt.savefig('alpha3.eps')
+    plt.savefig('alpha_4.eps')
 
 
 if __name__ == "__main__":
@@ -35,22 +35,22 @@ if __name__ == "__main__":
     betas_p_names = {}
     betas_ref = {}
 
-    name_ref = raw_input("Enter name of reference phase: ")
+    name_ref = input("Enter name of reference phase: ")
     done = False
     while not done:
-       pressure = raw_input("Pressure: ")
+       pressure = input("Pressure: ")
        if pressure == "":
            done = True
-           print "Done reference"
+           print("Done reference")
            continue
-       A = float(raw_input("A parameter of reference: "))
-       B = float(raw_input("B parameter of reference: "))
-       C = float(raw_input("C parameter of reference: "))
+       A = float(input("A parameter of reference: "))
+       B = float(input("B parameter of reference: "))
+       C = float(input("C parameter of reference: "))
        betas_ref[pressure] = castep_isotope_sub.ln_beta_function(Ts, A, B, C)
 
     Pdone = False
     while not Pdone:
-        pressure = raw_input("Pressure: ")
+        pressure = input("Pressure: ")
         if pressure == "":
            Pdone = True
            continue
@@ -59,13 +59,13 @@ if __name__ == "__main__":
         betas = []
         done = False
         while not done:
-            name = raw_input("Enter name (empty string when done): ")
+            name = input("Enter name (empty string when done): ")
             if name == "":
                 done = True
                 continue
-            A = float(raw_input("A parameter: "))
-            B = float(raw_input("B parameter: "))
-            C = float(raw_input("C parameter: "))
+            A = float(input("A parameter: "))
+            B = float(input("B parameter: "))
+            C = float(input("C parameter: "))
             names.append(name)
             betas.append(castep_isotope_sub.ln_beta_function(Ts, A, B, C))
         betas_p_names[pressure] = names
