@@ -252,9 +252,9 @@ class EarthModel():
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
     model = EarthModel(ak135)
-    print model(100)
-    print model(4000)
-    print model(4000.5)
+    print(model(100))
+    print(model(4000))
+    print(model(4000.5))
     fig = plt.figure()
     model.plot(fig)
     plt.show()
