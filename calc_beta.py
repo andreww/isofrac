@@ -24,7 +24,7 @@ def read_frequences(filename):
 
     get_freq_weights_RE = re.compile(r"^\s+q-pt=\s+\d+\s+[\+\-]?\d+\.\d+\s+[\+\-]?\d+\.\d+\s+[\+\-]?\d+\.\d+\s+(\d+\.\d+)\s*$", re.MULTILINE)
 
-    get_lattice_vecs_RE = re.compile(r"^\s+Unit cell vectors \(A\)\n\s*(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s*\n\s*(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s*\n\s*(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)", re.MULTILINE)
+    get_lattice_vecs_RE = re.compile(r"^\s+Unit cell vectors \(A\)\n\s*(-?\d+\.\d+)\s+(-?\d+\.\d+)\s+(-?\d+\.\d+)\s*\n\s*(-?\d+\.\d+)\s+(-?\d+\.\d+)\s+(-?\d+\.\d+)\s*\n\s*(-?\d+\.\d+)\s+(-?\d+\.\d+)\s+(-?\d+\.\d+)", re.MULTILINE)
 
     fh = open(filename, 'r')
     filelines = fh.read()
