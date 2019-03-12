@@ -78,7 +78,7 @@ if __name__ == "__main__":
     import matplotlib.pyplot as plt
 
     # Depth range of interest
-    depths = np.linspace(0.0, 1400.0, num=200)
+    depths = np.linspace(0.0, 2800.0, num=200)
 
     # Get our list of Ps and Ts
     Ts, Ps = depth_PT(depths)
@@ -102,17 +102,17 @@ if __name__ == "__main__":
     Mg2SiO4_Vs_athermal = Mg2SiO4_eos(Ps, np.zeros_like(Ts))
 
     # 1000.ln(beta) for MgO
-    MgO_beta_fun = fit_beta(glob.glob('../MgO_DFPT/MgO_prim222_900eV_k333_q444_DFPT_*GPa/MgO.castep'), supercell=True) 
+    MgO_beta_fun = fit_beta(glob.glob('../free_energy/MgO/MgO_*GPa/MgO.castep')) 
     MgO_betas = MgO_beta_fun(Ts, MgO_Vs)
     MgO_betas_athermal = MgO_beta_fun(Ts, MgO_Vs_athermal)
 
     # 1000.ln(beta) for MgSiO3
-    MgSiO3_beta_fun = fit_beta(glob.glob('../MgSiO3_DFPT/MgSiO3_900eV_k333_q333_DFPT_*GPa/mgsio3.castep')) 
+    MgSiO3_beta_fun = fit_beta(glob.glob('../free_energy/MgSiO3/MgSiO3_*GPa/MgSiO3.castep')) 
     MgSiO3_betas = MgSiO3_beta_fun(Ts, MgSiO3_Vs)
     MgSiO3_betas_athermal = MgSiO3_beta_fun(Ts, MgSiO3_Vs_athermal)
 
     # 1000.ln(beta) for Mg2SiO3
-    Mg2SiO4_beta_fun = fit_beta(glob.glob('../Forsterite_DFPT/Fo_900ev_k424_q313_DFPT_*GPa/forsterite.castep')) 
+    Mg2SiO4_beta_fun = fit_beta(glob.glob('../free_energy/Mg2SiO4/Mg2SiO4_*GPa/Mg2SiO4.castep')) 
     Mg2SiO4_betas = Mg2SiO4_beta_fun(Ts, Mg2SiO4_Vs)
     Mg2SiO4_betas_athermal = Mg2SiO4_beta_fun(Ts, Mg2SiO4_Vs_athermal)
 
@@ -129,7 +129,8 @@ if __name__ == "__main__":
     fs = 14
     fs_l = fs
 
-    ax_depths = np.array([0, 200, 400, 600, 800, 1000, 1200, 1400])
+    ax_depths = np.array([0, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 
+                          2400, 2600, 2800])
     ax_Ts, ax_Ps = depth_PT(ax_depths)
     ax1.invert_yaxis()
     ax1.plot(ax_Ts, ax_Ps, ':g')
@@ -145,24 +146,34 @@ if __name__ == "__main__":
     ax2.tick_params(axis='both', which='both', labelsize=fs_l)
     ax3 = ax2.twiny()
     # For Tim's latest we want Mg25 - aparantly half the fractionation
-    ax3.set_xlabel(r"$\Delta^{}$Mg (per mill) relative to forsterite".format('{25}'), fontsize=fs)
-    ax3.set_xlim(left=0.0, right=0.12/2.0)
-    ax3.tick_params(axis='both', which='both', labelsize=fs_l)
-    # ax1.plot((Mg2SiO4_betas_athermal - MgO_betas_athermal), depths, 'b--')
-    # ax1.plot((Mg2SiO4_betas - MgO_betas), depths, 'b-')
-    # ax1.plot((Mg2SiO4_betas_athermal - MgSiO3_betas_athermal), depths, 'r--')
-    ax3.plot((Mg2SiO4_betas - MgSiO3_betas)/2.0, depths, 'r-')
+    mg_25 = False
+    if mg_25:
+        ax3.set_xlabel(r"$\Delta^{}$Mg (per mill) relative to forsterite".format('{25}'), fontsize=fs)
+        ax3.set_xlim(left=0.0, right=0.12/2.0)
+    else:
+        ax3.set_xlabel(r"$\Delta^{}$Mg (per mill) relative to forsterite".format('{26}'), fontsize=fs)
+        ax3.set_xlim(left=0.0, right=0.12)
 
-    #ax2 = ax1.twinx()
-    #ax2_tick_ds = np.array([200, 400, 600, 800, 1000])
-    #ax2_tick_Ps, ax2_tick_Ts = depth_PT(ax2_tick_ds)
-    #ax2_tick_labs = ["200", "400", "600", "800", "1000"]
-    #ax2.set_ylabel("P (GPa)")
-    #ax2.set_yticks(ax2_tick_ds)
-    #ax2.set_yticks(ax2_tick_labs)
+    ax3.tick_params(axis='both', which='both', labelsize=fs_l)
+    if mg_25:
+        ax3.plot((Mg2SiO4_betas - MgSiO3_betas)/2.0, depths, 'r-')
+    else: 
+        ax3.plot((Mg2SiO4_betas_athermal - MgO_betas_athermal), depths, 'b--')
+        ax3.plot((Mg2SiO4_betas - MgO_betas), depths, 'b-')
+        ax3.plot((Mg2SiO4_betas - MgSiO3_betas), depths, 'r-')
+        ax3.plot((Mg2SiO4_betas_athermal - MgSiO3_betas_athermal), depths, 'r--')
+
+    
+        #ax2 = ax1.twinx()
+        #ax2_tick_ds = np.array([200, 400, 600, 800, 1000])
+        #ax2_tick_Ps, ax2_tick_Ts = depth_PT(ax2_tick_ds)
+        #ax2_tick_labs = ["200", "400", "600", "800", "1000"]
+        #ax2.set_ylabel("P (GPa)")
+        #ax2.set_yticks(ax2_tick_ds)
+        #ax2.set_yticks(ax2_tick_labs)
 
     f.tight_layout()
 
-    f.savefig("alpha_geotherm_2.pdf")
+    f.savefig("alpha_geotherm_3.pdf")
 
     plt.show()
