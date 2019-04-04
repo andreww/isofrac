@@ -13,17 +13,21 @@ earth_model = earthref.EarthModel(earthref.ak135)
 def depth_PT(depth):
     """Retrun liquidus P and T at a given depth in a magma ocean
 
-    Liquidus data is taken from figure 3 of Andrault et at. 2011
-    (EPSL doi:10.1016/j.epsl.2011.02.006) and is for a chondritic 
-    material. We assime linear behaviour to 60 GPa.
+    Liquidus data Andrault et at. 2011 (EPSL doi:10.1016/j.epsl.2011.02.006)
+    who fit a modified Simmon and Glatzel equation:
+
+         T = T0 (P/a+1_^(1/c) 
+
+    (see section 3.4) with parameters listed below. This replaces a
+    previous linear fit to data at 0 and 60 GPa.
     """
     
     P = earth_model(6371-depth) # Interpolating AK135...
     # We now have P, T is from TP plot
-    T_0 = 2000.0 # T_liquid is 2000 K at 0 GPa
-    T_60 = 3500.0 # at 60 GPa
-    dTdP = (T_60 - T_0) / 60.0
-    T = T_0 + P*dTdP
+    T_0 = 1940.0 # virtual liqidus temperature at 0 GPa
+    a = 26.0 # GPa
+    c = 1.9
+    T = T_0 * ((P / a) + 1)**(1/c)
     return T, P
 
 def fit_beta(files, supercell=False):
@@ -134,7 +138,7 @@ if __name__ == "__main__":
     ax_Ts, ax_Ps = depth_PT(ax_depths)
     ax1.invert_yaxis()
     ax1.plot(ax_Ts, ax_Ps, ':g')
-    ax1.set_xlim(left=2000, right=3600)
+    ax1.set_xlim(left=2000, right=5000)
     ax1.set_xlabel("T (K)", fontsize=fs)
     ax1.set_ylabel("P (GPa)", fontsize=fs)
     ax1.tick_params(axis='both', which='both', labelsize=fs_l)
@@ -174,6 +178,6 @@ if __name__ == "__main__":
 
     f.tight_layout()
 
-    f.savefig("alpha_geotherm_3.pdf")
+    f.savefig("alpha_geotherm_3_new_liqidus.pdf")
 
     plt.show()
