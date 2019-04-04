@@ -11,12 +11,14 @@ def plot_alpha(Ts, betas_ref, betas_plot, name_ref, names_plot):
 
     fix, ax1 = plt.subplots()
 
-    styles = ['k--', 'k-', 'g--', 'g-', 'b--', 'b-', 'r--', 'r-']
+    styles = ['k--', 'k-', 'b--', 'b-', 'g--', 'g-', 'r--', 'r-']
     i = 0
 
+    print()
     for pressure, beta_ref in betas_ref.items(): 
         for bet_plot, name_plot in zip(betas_plot[pressure], names_plot[pressure]):
             alpha = beta_ref - bet_plot
+            print("pressure", pressure, "name", name_plot, "style", styles[i]) 
             ax1.plot(Ts, alpha, styles[i], label=name_plot + str(pressure))
             i = i + 1
 
