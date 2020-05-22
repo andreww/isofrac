@@ -185,7 +185,17 @@ if __name__ == "__main__":
 
     # New plot for melt...
 
-    melt_ln_betas = ionic_model.ionic_model_beta(ionic_model.ionic_model_force_constant(ionic_model.melt_bond_length(Ps)), Ts)
+    # First calculate fudge
+    # 1000.ln( beta(melt)) - 1000.ln (beta(ol)) is -0.040 at 1573K and 0 GPa.
+    raw_beta_melt = ionic_model.ionic_model_beta(ionic_model.ionic_model_force_constant(ionic_model.melt_bond_length(0.0)), 1573)
+    raw_beta_ol = Mg2SiO4_beta_fun(1573, Mg2SiO4_eos(0.0, 1573))
+    fudge = (-0.040 + raw_beta_ol) - raw_beta_melt
+
+    print("Applying fudge of,", fudge, "per mill")
+    print("Raw fractionation factors at 0 GPa and 1573 K are", raw_beta_melt, "for melt and ", raw_beta_ol, "for ol")
+    print("Gives fixed fractionation of", ((raw_beta_melt + fudge) - raw_beta_ol))
+
+    melt_ln_betas = ionic_model.ionic_model_beta(ionic_model.ionic_model_force_constant(ionic_model.melt_bond_length(Ps)), Ts, fudge=fudge, fudge_temp=1573)
 
     f, ax1 = plt.subplots()
 

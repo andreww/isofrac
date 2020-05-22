@@ -18,7 +18,9 @@ def melt_bond_length(p, coeffs=None):
     the bond length fudge
     """
     if coeffs is None:
-        coeffs = [2.0909, 0.00165, 0.0000019]
+        # NB to "fudge" via bond length, set coeffs[0] to 2.0909
+        # 1.9613 is from the gray line in de Koker 
+        coeffs = [1.9613, 0.00165, 0.0000019]
 
     r = 0.0000000001 * (coeffs[0] + p * coeffs[1] + p**2 * coeffs[2])
     return r
@@ -37,7 +39,7 @@ def ionic_model_force_constant(r):
     kf = (zi * zj * e**2 * (1-n)) / (4.0 * np.pi * eps0 * r**3)
     return kf
 
-def ionic_model_beta(kf, T):
+def ionic_model_beta(kf, T, fudge=0, fudge_temp=0):
    """
    Calculate beta as per equation 27 of Young et al. (2015)
    """
@@ -49,5 +51,5 @@ def ionic_model_beta(kf, T):
 
    beta = 1 + (1/24) * (h / (kb * T))**2 * ((1 / (m1 * u)) - (1 / (m2 * u))) * (kf / (4 * np.pi**2))
 
-   # Return lmn(beta) as that's what we do with everything else
-   return np.log(beta)
+   # Return 1000.ln(beta) as that's what we do with everything else
+   return (1000.0 * np.log(beta)) + fudge
