@@ -39,7 +39,7 @@ def ionic_model_force_constant(r):
     kf = (zi * zj * e**2 * (1-n)) / (4.0 * np.pi * eps0 * r**3)
     return kf
 
-def ionic_model_beta(kf, T, fudge=0, fudge_temp=0):
+def ionic_model_beta(kf, T, fudge=0, fudge_temp=100):
    """
    Calculate beta as per equation 27 of Young et al. (2015)
    """
@@ -50,6 +50,10 @@ def ionic_model_beta(kf, T, fudge=0, fudge_temp=0):
    u = 1.6605402E-27 # Unified atomic mass (kg) - an amu in kg
 
    beta = 1 + (1/24) * (h / (kb * T))**2 * ((1 / (m1 * u)) - (1 / (m2 * u))) * (kf / (4 * np.pi**2))
+   frac_factor = 1000.0 * np.log(beta)
+
+   fudge_factor = ((h / (kb * T))**2) / ((h / (kb * fudge_temp))**2)
+   frac_factor = frac_factor + 1000.0 * np.log(np.exp(fudge/1000.0) * fudge_factor)
 
    # Return 1000.ln(beta) as that's what we do with everything else
-   return (1000.0 * np.log(beta)) + fudge
+   return frac_factor
