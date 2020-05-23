@@ -7,6 +7,7 @@ Based on Young et al. 2015
 """
 
 import numpy as np
+import scipy.optimize as spopt
 
 def melt_bond_length(p, coeffs):
     """
@@ -17,10 +18,14 @@ def melt_bond_length(p, coeffs):
     r = 0.0000000001 * (coeffs[0] + p * coeffs[1] + p**2 * coeffs[2])
     return r
 
-def ionic_model_force_constant(r):
+def ionic_model_force_constant(r, correction=1.0):
     """
     Ionic model force constant following equation 31 of Young (2015).
     All parameters other than r are designed to follow Remco's spreadsheet.
+
+    The optional correction allows a (r independent) change to the force
+    constant to be made (should be equivlent to changing the constant term
+    in the r expansion but easer to justify).
     """
     zi = 2.0 # Cation valence
     zj = -2.0 # Anion valence
@@ -29,7 +34,29 @@ def ionic_model_force_constant(r):
     e = 1.60217662E-19 # electron charge (C)
     
     kf = (zi * zj * e**2 * (1-n)) / (4.0 * np.pi * eps0 * r**3)
+    kf = kf * correction
     return kf
+
+
+def calculate_force_constant_correction(target_beta, c, t, p=0):
+   """
+   Find a correction term for the ionic model force constants such
+   that beta for these r coefficents and at this temperature is equal
+   to target_beta.
+   """
+   def get_my_beta(corec):
+       r = melt_bond_length(p, c)
+       kf = ionic_model_force_constant(r, correction=corec)
+       beta = ionic_model_beta(kf, t)
+       return beta
+
+   def beta_error(corec):
+       return get_my_beta(corec) - target_beta
+
+   ks_uncor = ionic_model_force_constant(melt_bond_length(p, c))
+   #corec_needed = spopt.brentq(beta_error, -0.999 * ks_uncor, 100*ks_uncor )
+   corec_needed = spopt.brentq(beta_error, 0.1, 10)
+   return corec_needed
 
 def ionic_model_beta(kf, T):
    """
@@ -49,7 +76,7 @@ def ionic_model_beta(kf, T):
 
 
 def plot_force_constants(pressures, coeff_sets, names=None, styles=None,
-                         colors=None, filename=None):
+                         colors=None, filename=None, kcorrs=None):
 
     import matplotlib
     if filename is not None:
@@ -71,10 +98,10 @@ def plot_force_constants(pressures, coeff_sets, names=None, styles=None,
                 axs[0].plot(pressures, r/1E-10, label=name)
                 axs[1].plot(pressures, k, label=name)
         else:
-            for coeffs, name, style, color in zip(coeff_sets, names,
-                                                styles, colors):
+            for coeffs, name, style, color, cor in zip(coeff_sets, names,
+                                                styles, colors, kcorrs):
                 r = melt_bond_length(pressures, coeffs)
-                k = ionic_model_force_constant(r)
+                k = ionic_model_force_constant(r, correction=cor)
                 axs[0].plot(pressures, r/1E-10, label=name, linestyle=style,
                          color=color)
                 axs[1].plot(pressures, k, label=name, linestyle=style,
@@ -117,12 +144,41 @@ if __name__ == "__main__":
     forsterite_r_50 = 1.9520E-10
     forsterite_r_100 = 1.870E-10
 
+    beta_dek_lq = ionic_model_beta(ionic_model_force_constant(
+                         melt_bond_length(0, r_coefs_melt_dekoker)),1573.0)
+    beta_fudge_lq = ionic_model_beta(ionic_model_force_constant(
+                         melt_bond_length(0, r_coefs_melt_fudge)),1573.0)
+    beta_fo = ionic_model_beta(ionic_model_force_constant(
+                         forsterite_r_0),1573.0)
+
+    print("Reduced frac factor liquid de Koker:", beta_dek_lq, "per mil")
+    print("Reduced frac factor liquid r fudge:", beta_fudge_lq, "per mil")
+    print("Reduced frac factor forsterite r:", beta_fo, "per mil")
+    print("Fractionation factor de Koker - fo:", beta_fo - beta_dek_lq, "per mil")
+    print("Fractionation factor fudge - fo:", beta_fo - beta_fudge_lq, "per mil")
+
+    meaured_alpha = 0.080
+    meaured_alpha = 0.07677 # Test to check the bond length fudge matces
+    target_beta = meaured_alpha + beta_fo
+    k_corr = calculate_force_constant_correction(target_beta,
+                                                 r_coefs_melt_dekoker, 1573.0) 
+    print("We need a correction to the force constant of:", k_corr, "UNITS?")
+
+    print("Corrected beta:", ionic_model_beta(ionic_model_force_constant(
+                 melt_bond_length(0, r_coefs_melt_dekoker),
+                 correction=k_corr), 1573.0))
+    print("Corrected alpha:", beta_fo - ionic_model_beta(ionic_model_force_constant(
+                 melt_bond_length(0, r_coefs_melt_dekoker),
+                 correction=k_corr), 1573.0))
+
 
     # Plot r and force constant as function of P
     plot_force_constants(np.linspace(0, 150, num=100),
-                         [r_coefs_melt_dekoker, r_coefs_melt_fudge],
-                         names=['de Koker', 'fudge'], styles=['-','-'],
-                         colors=['k', 'b'], filename="ionic_model_rs.pdf")
+                         [r_coefs_melt_dekoker, r_coefs_melt_fudge, r_coefs_melt_dekoker],
+                         names=['de Koker', 'fudge', 'k cor'], 
+                         kcorrs=[1,1,k_corr],
+                         styles=['-','-', ':'],
+                         colors=['k', 'b', 'g'], filename="ionic_model_rs.pdf")
 
 
     temps = np.concatenate((np.linspace(300.0, 500.0, num=40), 
@@ -149,6 +205,27 @@ if __name__ == "__main__":
     betas.append(ionic_model_beta(ionic_model_force_constant(
                  melt_bond_length(100, r_coefs_melt_dekoker)),temps))
     colors.append('k')
+    styles.append(':')
+
+    names.append('de Koker 0 GPa kcor')
+    betas.append(ionic_model_beta(ionic_model_force_constant(
+                 melt_bond_length(0, r_coefs_melt_dekoker),
+                 correction=k_corr),temps))
+    colors.append('y')
+    styles.append('-')
+
+    names.append('de Koker 50 GPa kcor')
+    betas.append(ionic_model_beta(ionic_model_force_constant(
+                 melt_bond_length(50, r_coefs_melt_dekoker),
+                 correction=k_corr),temps))
+    colors.append('y')
+    styles.append('--')
+
+    names.append('de Koker 100 GPa kcor')
+    betas.append(ionic_model_beta(ionic_model_force_constant(
+                 melt_bond_length(100, r_coefs_melt_dekoker),
+                 correction=k_corr),temps))
+    colors.append('y')
     styles.append(':')
 
     names.append('fudge 0 GPa')
