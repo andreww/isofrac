@@ -127,6 +127,73 @@ if __name__ == "__main__":
     for P, T, D, B_Fo, B_MgO, B_MgPv in zip(Ps, Ts, depths, Mg2SiO4_betas, MgO_betas, MgSiO3_betas):
         print(P, T, D, B_Fo-B_MgO, B_Fo-B_MgPv)
 
+
+    print("Sorting out the melt")
+    # First calculate fudge
+    # 1000.ln( beta(melt)) - 1000.ln (beta(ol)) is -0.080 at 1573K and 0 GPa.
+    melt_poly_coef = [1.9613, -0.00165, 0.0000019]
+    measured_fractionation = 0.080
+    measured_temperature = 1573.0
+    measured_pressure = 0.0
+    fo_reduced_frac = Mg2SiO4_beta_fun(1573, Mg2SiO4_eos(measured_pressure, 
+                                                         measured_temperature))
+    target_reduced_frac_melt = measured_fractionation + fo_reduced_frac
+    melt_k_corec = ionic_model.calculate_force_constant_correction(
+                   target_reduced_frac_melt, melt_poly_coef, measured_temperature)
+    print("Correction to Kf for melt is:", melt_k_corec) 
+
+    print("Uncorrected reduced fractionation factor of melt:",
+        ionic_model.ionic_model_beta(ionic_model.ionic_model_force_constant(
+           ionic_model.melt_bond_length(measured_pressure, melt_poly_coef)), 
+           measured_temperature), "per mill")
+    print("Corrected reduced fractionation factor of melt:",
+        ionic_model.ionic_model_beta(ionic_model.ionic_model_force_constant(
+           ionic_model.melt_bond_length(measured_pressure, melt_poly_coef),
+           correction=melt_k_corec), 
+           measured_temperature), "per mill")
+    print("Corrected fractionation:", 
+        ionic_model.ionic_model_beta(ionic_model.ionic_model_force_constant(
+           ionic_model.melt_bond_length(measured_pressure, melt_poly_coef),
+           correction=melt_k_corec),
+           measured_temperature) - 
+        Mg2SiO4_beta_fun(1573, Mg2SiO4_eos(measured_pressure, 
+                                                         measured_temperature)),
+        "per mill")
+
+    melt_ln_betas = ionic_model.ionic_model_beta(
+       ionic_model.ionic_model_force_constant(ionic_model.melt_bond_length(Ps,
+           melt_poly_coef), correction=melt_k_corec), Ts)
+
+    # And again for the athermal case
+    fo_reduced_frac_athermal = Mg2SiO4_beta_fun(1573, Mg2SiO4_eos(measured_pressure, 
+                                                         0.0))
+    target_reduced_frac_melt_athermal = measured_fractionation + fo_reduced_frac_athermal
+    melt_k_corec_athermal = ionic_model.calculate_force_constant_correction(
+                   target_reduced_frac_melt_athermal, melt_poly_coef, measured_temperature)
+    print("Correction to Kf for melt is:", melt_k_corec_athermal) 
+
+    print("Uncorrected reduced fractionation factor of melt:",
+        ionic_model.ionic_model_beta(ionic_model.ionic_model_force_constant(
+           ionic_model.melt_bond_length(measured_pressure, melt_poly_coef)), 
+           measured_temperature), "per mill")
+    print("Corrected reduced fractionation factor of melt:",
+        ionic_model.ionic_model_beta(ionic_model.ionic_model_force_constant(
+           ionic_model.melt_bond_length(measured_pressure, melt_poly_coef),
+           correction=melt_k_corec_athermal), 
+           measured_temperature), "per mill")
+    print("Corrected fractionation:", 
+        ionic_model.ionic_model_beta(ionic_model.ionic_model_force_constant(
+           ionic_model.melt_bond_length(measured_pressure, melt_poly_coef),
+           correction=melt_k_corec_athermal),
+           measured_temperature) - 
+        Mg2SiO4_beta_fun(1573, Mg2SiO4_eos(measured_pressure, 
+                                                        0.0)),
+        "per mill")
+
+    melt_ln_betas_athermal = ionic_model.ionic_model_beta(
+       ionic_model.ionic_model_force_constant(ionic_model.melt_bond_length(Ps,
+           melt_poly_coef), correction=melt_k_corec_athermal), Ts)
+
     print("Done fitting... now plotting")
 
     f, ax1 = plt.subplots()
@@ -157,7 +224,7 @@ if __name__ == "__main__":
         ax3.set_xlim(left=0.0, right=0.12/2.0)
     else:
         ax3.set_xlabel(r"$\Delta^{}$Mg (per mill) relative to forsterite".format('{26}'), fontsize=fs)
-        ax3.set_xlim(left=0.0, right=0.12)
+        #ax3.set_xlim(left=0.0, right=0.12)
 
     ax3.tick_params(axis='both', which='both', labelsize=fs_l)
     if mg_25:
@@ -167,6 +234,8 @@ if __name__ == "__main__":
         ax3.plot((Mg2SiO4_betas - MgO_betas), depths, 'b-')
         ax3.plot((Mg2SiO4_betas - MgSiO3_betas), depths, 'r-')
         ax3.plot((Mg2SiO4_betas_athermal - MgSiO3_betas_athermal), depths, 'r--')
+        ax3.plot((Mg2SiO4_betas_athermal - melt_ln_betas_athermal), depths, 'y--')
+        ax3.plot((Mg2SiO4_betas - melt_ln_betas), depths, 'y-')
 
     
         #ax2 = ax1.twinx()
@@ -185,18 +254,7 @@ if __name__ == "__main__":
 
     # New plot for melt...
 
-    # First calculate fudge
-    # 1000.ln( beta(melt)) - 1000.ln (beta(ol)) is -0.040 at 1573K and 0 GPa.
-    raw_beta_melt = ionic_model.ionic_model_beta(ionic_model.ionic_model_force_constant(ionic_model.melt_bond_length(0.0)), 1573)
-    raw_beta_ol = Mg2SiO4_beta_fun(1573, Mg2SiO4_eos(0.0, 1573))
-    fudge = (-0.040 + raw_beta_ol) - raw_beta_melt
-
-    print("Applying fudge of,", fudge, "per mill")
-    print("Raw fractionation factors at 0 GPa and 1573 K are", raw_beta_melt, "for melt and ", raw_beta_ol, "for ol")
-    print("Gives fixed fractionation of", ((raw_beta_melt + fudge) - raw_beta_ol))
-
-    melt_ln_betas = ionic_model.ionic_model_beta(ionic_model.ionic_model_force_constant(ionic_model.melt_bond_length(Ps)), Ts, fudge=fudge, fudge_temp=1573)
-
+    # Plotting
     f, ax1 = plt.subplots()
 
     fs = 14
@@ -231,12 +289,12 @@ if __name__ == "__main__":
     if mg_25:
         ax3.plot((melt_ln_betas - MgSiO3_betas)/2.0, depths, 'r-')
     else: 
-        ax3.plot((melt_ln_betas - Mg2SiO4_betas_athermal), depths, 'k--')
+        ax3.plot((melt_ln_betas_athermal - Mg2SiO4_betas_athermal), depths, 'k--')
         ax3.plot((melt_ln_betas - Mg2SiO4_betas), depths, 'k-')
-        ax3.plot((melt_ln_betas - MgO_betas_athermal), depths, 'b--')
+        ax3.plot((melt_ln_betas_athermal - MgO_betas_athermal), depths, 'b--')
         ax3.plot((melt_ln_betas - MgO_betas), depths, 'b-')
         ax3.plot((melt_ln_betas - MgSiO3_betas), depths, 'r-')
-        ax3.plot((melt_ln_betas - MgSiO3_betas_athermal), depths, 'r--')
+        ax3.plot((melt_ln_betas_athermal - MgSiO3_betas_athermal), depths, 'r--')
 
     
         #ax2 = ax1.twinx()
