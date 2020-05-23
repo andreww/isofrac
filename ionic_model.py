@@ -105,17 +105,22 @@ if __name__ == "__main__":
     # If run on the command line, just make some plots
 
     import castep_isotope_sub
+    import alpha_plotting
 
     # From Remco's spreadsheet. r(p) = c0 + c1*p + c2*p^2
     # where r is the bond length (in angstroms here) and
     # p is pressure (in GPa)
-    r_coefs_melt_dekoker = [1.9613, 0.00165, 0.0000019]
-    r_corfs_melt_fudge =   [2.0909, 0.00165, 0.0000019]
+    r_coefs_melt_dekoker = [1.9613, -0.00165, 0.0000019]
+    r_coefs_melt_fudge =   [2.0909, -0.00165, 0.0000019]
+
+    forsterite_r_0 = 2.1170E-10
+    forsterite_r_50 = 1.9520E-10
+    forsterite_r_100 = 1.870E-10
 
 
     # Plot r and force constant as function of P
     plot_force_constants(np.linspace(0, 150, num=100),
-                         [r_coefs_melt_dekoker, r_corfs_melt_fudge],
+                         [r_coefs_melt_dekoker, r_coefs_melt_fudge],
                          names=['de Koker', 'fudge'], styles=['-','-'],
                          colors=['k', 'b'], filename="ionic_model_rs.pdf")
 
@@ -146,5 +151,82 @@ if __name__ == "__main__":
     colors.append('k')
     styles.append(':')
 
+    names.append('fudge 0 GPa')
+    betas.append(ionic_model_beta(ionic_model_force_constant(
+                 melt_bond_length(0, r_coefs_melt_fudge)),temps))
+    colors.append('b')
+    styles.append('-')
+
+    names.append('fudge 50 GPa')
+    betas.append(ionic_model_beta(ionic_model_force_constant(
+                 melt_bond_length(50, r_coefs_melt_fudge)),temps))
+    colors.append('b')
+    styles.append('--')
+
+    names.append('fudge 100 GPa')
+    betas.append(ionic_model_beta(ionic_model_force_constant(
+                 melt_bond_length(100, r_coefs_melt_fudge)),temps))
+    colors.append('b')
+    styles.append(':')
+
+    names.append('forsterite ionic model 0 GPa')
+    betas.append(ionic_model_beta(ionic_model_force_constant(
+                 forsterite_r_0),temps))
+    colors.append('g')
+    styles.append('-')
+
+    names.append('forsterite ionic model 50 GPa')
+    betas.append(ionic_model_beta(ionic_model_force_constant(
+                 forsterite_r_50),temps))
+    colors.append('g')
+    styles.append('--')
+
+    names.append('forsterite ionic model 100 GPa')
+    betas.append(ionic_model_beta(ionic_model_force_constant(
+                 forsterite_r_100),temps))
+    colors.append('g')
+    styles.append(':')
+
     castep_isotope_sub.plot_beta(temps, betas , names,
-            colors=colors, styles=styles, filename='test.pdf') 
+            colors=colors, styles=styles, filename='ionic_model_beta.pdf') 
+
+
+    # Plot alpha for Fo # NB: this is liq - Fo not Fo - liq.
+    alpha_t_0gpa = ((ionic_model_beta(ionic_model_force_constant(
+                         melt_bond_length(0, r_coefs_melt_fudge)),temps)) -
+                    (ionic_model_beta(ionic_model_force_constant(
+                         forsterite_r_0),temps)))
+    alpha_t_50gpa = ((ionic_model_beta(ionic_model_force_constant(
+                         melt_bond_length(50, r_coefs_melt_fudge)),temps)) -
+                    (ionic_model_beta(ionic_model_force_constant(
+                         forsterite_r_50),temps)))
+    alpha_t_100gpa = ((ionic_model_beta(ionic_model_force_constant(
+                         melt_bond_length(100, r_coefs_melt_fudge)),temps)) -
+                    (ionic_model_beta(ionic_model_force_constant(
+                         forsterite_r_100),temps)))
+
+    dkalpha_t_0gpa = ((ionic_model_beta(ionic_model_force_constant(
+                         melt_bond_length(0, r_coefs_melt_dekoker)),temps)) -
+                    (ionic_model_beta(ionic_model_force_constant(
+                         forsterite_r_0),temps)))
+    dkalpha_t_50gpa = ((ionic_model_beta(ionic_model_force_constant(
+                         melt_bond_length(50, r_coefs_melt_dekoker)),temps)) -
+                    (ionic_model_beta(ionic_model_force_constant(
+                         forsterite_r_50),temps)))
+    dkalpha_t_100gpa = ((ionic_model_beta(ionic_model_force_constant(
+                         melt_bond_length(100, r_coefs_melt_dekoker)),temps)) -
+                    (ionic_model_beta(ionic_model_force_constant(
+                         forsterite_r_100),temps)))
+
+    import matplotlib.pyplot as plt
+    fix, ax1 = plt.subplots()
+    ax1.plot(temps, alpha_t_0gpa, 'k-', label='[fudge lq - fo] 0 GPa')
+    ax1.plot(temps, alpha_t_50gpa, 'b-', label='[fudge lq - fo] 50 GPa')
+    ax1.plot(temps, alpha_t_100gpa, 'g-', label='[fudge lq - fo] 100 GPa')
+    ax1.plot(temps, dkalpha_t_0gpa, 'k:', label='[dk lq - fo] 0 GPa')
+    ax1.plot(temps, dkalpha_t_50gpa, 'b:', label='[dk lq - fo] 50 GPa')
+    ax1.plot(temps, dkalpha_t_100gpa, 'g:', label='[dk lq - fo] 100 GPa')
+    ax1.set_ylabel(r"$\Delta^{}$Mg (per mill) relative to {}".format('{26}', "liquid"))
+    ax1.set_xlabel("T (K)")
+    plt.legend()
+    plt.savefig("ionic_model_alpha.pdf")
