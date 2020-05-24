@@ -139,8 +139,8 @@ if __name__ == "__main__":
                                                          measured_temperature))
     target_reduced_frac_melt = measured_fractionation + fo_reduced_frac
     melt_k_corec = ionic_model.calculate_force_constant_correction(
-                   target_reduced_frac_melt, melt_poly_coef, measured_temperature)
-    print("Correction to Kf for melt is:", melt_k_corec) 
+                   target_reduced_frac_melt, melt_poly_coef, measured_temperature, mode='offset')
+    print("Offset correction to Kf for melt is:", melt_k_corec) 
 
     print("Uncorrected reduced fractionation factor of melt:",
         ionic_model.ionic_model_beta(ionic_model.ionic_model_force_constant(
@@ -149,12 +149,12 @@ if __name__ == "__main__":
     print("Corrected reduced fractionation factor of melt:",
         ionic_model.ionic_model_beta(ionic_model.ionic_model_force_constant(
            ionic_model.melt_bond_length(measured_pressure, melt_poly_coef),
-           correction=melt_k_corec), 
+           offset=melt_k_corec), 
            measured_temperature), "per mill")
     print("Corrected fractionation:", 
         ionic_model.ionic_model_beta(ionic_model.ionic_model_force_constant(
            ionic_model.melt_bond_length(measured_pressure, melt_poly_coef),
-           correction=melt_k_corec),
+           offset=melt_k_corec),
            measured_temperature) - 
         Mg2SiO4_beta_fun(1573, Mg2SiO4_eos(measured_pressure, 
                                                          measured_temperature)),
@@ -162,15 +162,15 @@ if __name__ == "__main__":
 
     melt_ln_betas = ionic_model.ionic_model_beta(
        ionic_model.ionic_model_force_constant(ionic_model.melt_bond_length(Ps,
-           melt_poly_coef), correction=melt_k_corec), Ts)
+           melt_poly_coef), offset=melt_k_corec), Ts)
 
     # And again for the athermal case
     fo_reduced_frac_athermal = Mg2SiO4_beta_fun(1573, Mg2SiO4_eos(measured_pressure, 
                                                          0.0))
     target_reduced_frac_melt_athermal = measured_fractionation + fo_reduced_frac_athermal
     melt_k_corec_athermal = ionic_model.calculate_force_constant_correction(
-                   target_reduced_frac_melt_athermal, melt_poly_coef, measured_temperature)
-    print("Correction to Kf for melt is:", melt_k_corec_athermal) 
+                   target_reduced_frac_melt_athermal, melt_poly_coef, measured_temperature, mode='offset')
+    print("Offset correction to Kf for melt (athermal) is:", melt_k_corec_athermal) 
 
     print("Uncorrected reduced fractionation factor of melt:",
         ionic_model.ionic_model_beta(ionic_model.ionic_model_force_constant(
@@ -179,12 +179,12 @@ if __name__ == "__main__":
     print("Corrected reduced fractionation factor of melt:",
         ionic_model.ionic_model_beta(ionic_model.ionic_model_force_constant(
            ionic_model.melt_bond_length(measured_pressure, melt_poly_coef),
-           correction=melt_k_corec_athermal), 
+           offset=melt_k_corec_athermal), 
            measured_temperature), "per mill")
     print("Corrected fractionation:", 
         ionic_model.ionic_model_beta(ionic_model.ionic_model_force_constant(
            ionic_model.melt_bond_length(measured_pressure, melt_poly_coef),
-           correction=melt_k_corec_athermal),
+           offset=melt_k_corec_athermal),
            measured_temperature) - 
         Mg2SiO4_beta_fun(1573, Mg2SiO4_eos(measured_pressure, 
                                                         0.0)),
@@ -192,7 +192,7 @@ if __name__ == "__main__":
 
     melt_ln_betas_athermal = ionic_model.ionic_model_beta(
        ionic_model.ionic_model_force_constant(ionic_model.melt_bond_length(Ps,
-           melt_poly_coef), correction=melt_k_corec_athermal), Ts)
+           melt_poly_coef), offset=melt_k_corec_athermal), Ts)
 
     print("Done fitting... now plotting")
 
@@ -248,7 +248,7 @@ if __name__ == "__main__":
 
     f.tight_layout()
 
-    f.savefig("alpha_geotherm_4_liqidus.pdf")
+    f.savefig("alpha_geotherm_4b_liqidus.pdf")
 
     #plt.show()
 
@@ -307,6 +307,6 @@ if __name__ == "__main__":
 
     f.tight_layout()
 
-    f.savefig("alpha_geotherm_4_liqidus_melt.pdf")
+    f.savefig("alpha_geotherm_4b_liqidus_melt.pdf")
 
     plt.show()
