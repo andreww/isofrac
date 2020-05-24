@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 
 import numpy as np
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
 
 import castep_isotope_sub
 
-def plot_alpha(Ts, betas_ref, betas_plot, name_ref, names_plot):
+def plot_alpha(Ts, betas_ref, betas_plot, name_ref, names_plot, filename='alpha_4.eps'):
+    import matplotlib
+    if filename is not None:
+        matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
 
     fix, ax1 = plt.subplots()
 
@@ -24,9 +25,11 @@ def plot_alpha(Ts, betas_ref, betas_plot, name_ref, names_plot):
 
     ax1.set_ylabel(r"$\Delta^{}$Mg (per mill) relative to {}".format('{26}', name_ref))
     ax1.set_xlabel("T (K)")
-    #plt.legend()
-    #plt.show()
-    plt.savefig('alpha_4.eps')
+    if filename is not None:
+        plt.savefig(filename)
+    else:
+        plt.legend()
+        plt.show()
 
 
 if __name__ == "__main__":

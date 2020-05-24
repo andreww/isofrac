@@ -18,7 +18,7 @@ def melt_bond_length(p, coeffs):
     r = 0.0000000001 * (coeffs[0] + p * coeffs[1] + p**2 * coeffs[2])
     return r
 
-def ionic_model_force_constant(r, correction=1.0):
+def ionic_model_force_constant(r, correction=1.0, offset=0.0):
     """
     Ionic model force constant following equation 31 of Young (2015).
     All parameters other than r are designed to follow Remco's spreadsheet.
@@ -34,11 +34,11 @@ def ionic_model_force_constant(r, correction=1.0):
     e = 1.60217662E-19 # electron charge (C)
     
     kf = (zi * zj * e**2 * (1-n)) / (4.0 * np.pi * eps0 * r**3)
-    kf = kf * correction
+    kf = (kf * correction) + offset
     return kf
 
 
-def calculate_force_constant_correction(target_beta, c, t, p=0):
+def calculate_force_constant_correction(target_beta, c, t, p=0, mode='correction'):
    """
    Find a correction term for the ionic model force constants such
    that beta for these r coefficents and at this temperature is equal
@@ -46,16 +46,21 @@ def calculate_force_constant_correction(target_beta, c, t, p=0):
    """
    def get_my_beta(corec):
        r = melt_bond_length(p, c)
-       kf = ionic_model_force_constant(r, correction=corec)
+       if mode=='correction':
+           kf = ionic_model_force_constant(r, correction=corec)
+       elif mode=='offset':
+           kf = ionic_model_force_constant(r, offset=corec)
        beta = ionic_model_beta(kf, t)
        return beta
 
    def beta_error(corec):
        return get_my_beta(corec) - target_beta
-
-   ks_uncor = ionic_model_force_constant(melt_bond_length(p, c))
-   #corec_needed = spopt.brentq(beta_error, -0.999 * ks_uncor, 100*ks_uncor )
-   corec_needed = spopt.brentq(beta_error, 0.1, 10)
+   
+   if mode=='correction':
+       corec_needed = spopt.brentq(beta_error, 0.1, 10)
+   elif mode=='offset':
+      ks_uncor = ionic_model_force_constant(melt_bond_length(p, c))
+      corec_needed = spopt.brentq(beta_error, -0.999 * ks_uncor, 100*ks_uncor ) 
    return corec_needed
 
 def ionic_model_beta(kf, T):
@@ -76,7 +81,7 @@ def ionic_model_beta(kf, T):
 
 
 def plot_force_constants(pressures, coeff_sets, names=None, styles=None,
-                         colors=None, filename=None, kcorrs=None):
+                         colors=None, filename=None, kcorrs=None, offsets=None):
 
     import matplotlib
     if filename is not None:
@@ -98,10 +103,10 @@ def plot_force_constants(pressures, coeff_sets, names=None, styles=None,
                 axs[0].plot(pressures, r/1E-10, label=name)
                 axs[1].plot(pressures, k, label=name)
         else:
-            for coeffs, name, style, color, cor in zip(coeff_sets, names,
-                                                styles, colors, kcorrs):
+            for coeffs, name, style, color, cor, off in zip(coeff_sets, names,
+                                                styles, colors, kcorrs, offsets):
                 r = melt_bond_length(pressures, coeffs)
-                k = ionic_model_force_constant(r, correction=cor)
+                k = ionic_model_force_constant(r, correction=cor, offset=off)
                 axs[0].plot(pressures, r/1E-10, label=name, linestyle=style,
                          color=color)
                 axs[1].plot(pressures, k, label=name, linestyle=style,
