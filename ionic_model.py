@@ -18,7 +18,7 @@ def melt_bond_length(p, coeffs):
     r = 0.0000000001 * (coeffs[0] + p * coeffs[1] + p**2 * coeffs[2])
     return r
 
-def ionic_model_force_constant(r, correction=1.0, offset=0.0):
+def ionic_model_force_constant(r, correction=1.0, offset=0.0, n=12):
     """
     Ionic model force constant following equation 31 of Young (2015).
     All parameters other than r are designed to follow Remco's spreadsheet.
@@ -29,7 +29,7 @@ def ionic_model_force_constant(r, correction=1.0, offset=0.0):
     """
     zi = 2.0 # Cation valence
     zj = -2.0 # Anion valence
-    n = 12 # Born-Mayer constant. Ultimatly LJ I think
+    # n is Born-Mayer constant. Ultimatly LJ I think. Default to 12
     eps0 = 8.854187817E-12 # Vaccum permittivity (F/m)
     e = 1.60217662E-19 # electron charge (C)
     
