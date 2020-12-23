@@ -13,6 +13,14 @@ import ionic_model
 
 earth_model = earthref.EarthModel(earthref.ak135)
 
+# Define constants
+eps0 = 8.854187817E-12 # Vacuum permittivity (F/m)
+e = 1.60217662E-19 # electron charge (C)
+
+# Conversion factors
+m2ang = 1.0E10
+j2ev = 6.242E18
+
 def depth_PT(depth):
     """Retrun liquidus P and T at a given depth in a magma ocean
 
@@ -174,7 +182,7 @@ if __name__ == "__main__":
           "per mill")
     print("Observed melt - Fo frac is:", measured_fractionation, "per mill") 
     
-    melt_ln_betas = calc_beta_model(ionic_model.melt_bond_length(Ps, melt_poly_coef),
+    melt_ln_betas = calc_beta_model(ionic_model.melt_bond_length(Ps, melt_poly_coef)*1E10,
                                     coord_spline(Ps), Ts, *all_popt)
 
 
