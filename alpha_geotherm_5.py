@@ -3,6 +3,7 @@
 import numpy as np
 
 import scipy.interpolate as spi
+import scipy.optimize as spo
 
 import bulk_run_phonons
 import fit_beta_V
@@ -167,6 +168,21 @@ if __name__ == "__main__":
         k = kf(r*1E-10, 2.0*qfac, -2.0*qfac, n)
         beta = ionic_model.ionic_model_beta(k, t) 
         return beta
+
+    def find_beta_qfac0(r, coord, t, qfac0, qfac1, qfacgrd, target):
+
+        def func(qf):
+            return calc_beta_model(r, coord, t, qf, qfac1, qfacgrd) - target
+
+        print("-5", func(-5.0))
+        print("-2", func(-2.0))
+        print("-1", func(-1.0))
+        print("0", func(0.0))
+        print("2", func(2.0))
+        print("5", func(5.0))
+        new_qf, r = spo.brentq(func, 2.0, 5.0, full_output=True)
+        print(r)
+        return new_qf
     
     measured_fractionation = 0.080
     measured_temperature = 1573.0
@@ -175,19 +191,42 @@ if __name__ == "__main__":
     r_melt = ionic_model.melt_bond_length(0.0, melt_poly_coef)
     coord_melt = coord_spline(0.0)
     beta_melt = calc_beta_model(r_melt*1E10, coord_melt, 1573.0, *all_popt)
-    
+    beta_ol = Mg2SiO4_beta_fun(1573, Mg2SiO4_eos(measured_pressure, measured_temperature)) 
+    print("Calculated melt is:",
+          beta_melt,
+          "per mill")
+    print("Calculated Fo frac is:",
+          beta_ol,
+          "per mill")
     print("Calculated melt - Fo frac is:",
-          beta_melt - 
-          Mg2SiO4_beta_fun(1573, Mg2SiO4_eos(measured_pressure, measured_temperature)),
+          beta_melt - beta_ol,
+          "per mill")
+    print("Observed melt - Fo frac is:", measured_fractionation, "per mill") 
+
+    print("Applying model correction")
+    new_qf = find_beta_qfac0(r_melt*1E10, coord_melt, 1573.0, all_popt[0], 
+                             all_popt[1], all_popt[2], measured_fractionation + beta_ol)
+    print("New qfac is", new_qf)
+    all_popt[0] = new_qf
+
+    beta_melt = calc_beta_model(r_melt*1E10, coord_melt, 1573.0, *all_popt)
+    print("Calculated melt - Fo frac is NOW:",
+          beta_melt - beta_ol,
           "per mill")
     print("Observed melt - Fo frac is:", measured_fractionation, "per mill") 
     
     melt_ln_betas = calc_beta_model(ionic_model.melt_bond_length(Ps, melt_poly_coef)*1E10,
                                     coord_spline(Ps), Ts, *all_popt)
 
-
     # And again for the athermal case
-    melt_ln_betas_athermal = melt_ln_betas
+    beta_ol_athermal = Mg2SiO4_beta_fun(1573, Mg2SiO4_eos(measured_pressure, 0.0)) 
+    print("Applying model correction")
+    new_qf = find_beta_qfac0(r_melt*1E10, coord_melt, 1573.0, all_popt[0], 
+                             all_popt[1], all_popt[2], measured_fractionation + beta_ol_athermal)
+    print("New qfac is", new_qf)
+    all_popt[0] = new_qf
+    melt_ln_betas_athermal = calc_beta_model(ionic_model.melt_bond_length(Ps, melt_poly_coef)*1E10,
+                                    coord_spline(Ps), Ts, *all_popt)
 
     print("Done fitting... now plotting")
 
