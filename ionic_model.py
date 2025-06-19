@@ -183,7 +183,8 @@ if __name__ == "__main__":
                          names=['de Koker', 'fudge', 'k cor'], 
                          kcorrs=[1,1,k_corr],
                          styles=['-','-', ':'],
-                         colors=['k', 'b', 'g'], filename="ionic_model_rs.pdf")
+                         colors=['k', 'b', 'g'], filename="ionic_model_rs.pdf",
+                         offsets=[0.0, 0.0, 0.0])
 
 
     temps = np.concatenate((np.linspace(300.0, 500.0, num=40), 
