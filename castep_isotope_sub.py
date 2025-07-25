@@ -142,7 +142,7 @@ def run_and_report(seedname, fineqpoints=None):
 
 
 def plot_beta(Ts, betas, names=None, styles=None, colors=None, 
-     filename=None):
+     filename=None, ax=None):
 
     import matplotlib
     if filename is not None:
@@ -150,7 +150,10 @@ def plot_beta(Ts, betas, names=None, styles=None, colors=None,
     import matplotlib.pyplot as plt
 
     Tsm1 = 1E6/(Ts**2.0)
-    fix, ax1 = plt.subplots()
+    if ax is not None:
+        ax1 = ax
+    else:
+        _, ax1 = plt.subplots()
     if type(betas) is list or type(betas) is tuple:
         if (names is None) and (styles is None):
             for beta in betas:
@@ -165,13 +168,14 @@ def plot_beta(Ts, betas, names=None, styles=None, colors=None,
                          color=color)
     else:
         ax1.plot(Tsm1, betas, "b-")
-    ax1.set_ylabel(r"$1000.\ln(\beta)$ (per mill)")
+    ax1.set_ylabel(r"$1000.\ln \beta$" + "(" + u'\u2030' + ")")
     ax1.set_xlabel("$1000000 / T^2$ ($10^6$ K$^{-2}$)")
     ax1.set_xlim(right=Tsm1.max())
-    x1locs, x1labels = plt.xticks()
+    x1locs = ax1.get_xticks()
+    x1labels = ax1.get_xticklabels()
 
     if names is not None:
-        plt.legend(loc=2)
+        ax1.legend(loc=2)
 
     ax2 = ax1.twiny()
     ax2.set_xlabel("T (K)")
@@ -184,11 +188,12 @@ def plot_beta(Ts, betas, names=None, styles=None, colors=None,
         if thisval != float("inf"):
             x2vals.append("{:4.0f}".format(thisval))
             x2locs.append(xloc)
-    plt.xticks(x2locs, x2vals)
+    ax2.set_xticks(x2locs)
+    ax2.set_xticklabels(x2vals)
 
     if filename is not None:
         plt.savefig(filename)
-    else:
+    elif ax is None:
         plt.show()
 
 def cleanup(seedname):
