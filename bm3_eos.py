@@ -150,7 +150,7 @@ def _f_2_latex(value, prec=2, mathmode=True, noplus=False):
 
 def BM3_EOS_energy_plot(V, F, V0, E0, K0, Kp0, filename=None, Ts=None,
         staticV=None, staticF=None, staticV0=None, staticE0=None,
-        staticK0=None, staticKp0=None, ax=None):
+        staticK0=None, staticKp0=None, ax=None, leg=True):
     import matplotlib
     if filename is not None:
         matplotlib.use('Agg')
@@ -184,7 +184,7 @@ def BM3_EOS_energy_plot(V, F, V0, E0, K0, Kp0, filename=None, Ts=None,
                 staticK0, staticKp0)
             ax.plot(fine_vs, fine_fs, '-k', color=c)
             ax.plot(staticV, staticF, 'sk', label='static')
-        ax.legend(ncol=3, bbox_to_anchor=(0.  , 0.96, 1., .102), loc=3,
+        if leg: ax.legend(ncol=3, bbox_to_anchor=(0.  , 0.96, 1., .102), loc=3,
                    mode="expand", borderaxespad=0., numpoints=1)
 
     ax.set_xlabel('Volume (A$^3$)')
@@ -236,21 +236,28 @@ def BM3_EOS_pressure_plot(Vmin, Vmax, V0, K0, Kp0, ax=None,
             plt.show()
 
 def BM3_EOS_twoplots(minV, maxV, Vs, Fs, V0s, E0s, K0s, 
-        Kp0s, Ts, filename=None):
+        Kp0s, Ts, filename=None, axs=None):
+
     import matplotlib
     if filename is not None:
         matplotlib.use('Agg')
     import matplotlib.pyplot as plt
-    fig = plt.figure(figsize=(5.83,8.27), dpi=150)
-    fig.subplots_adjust(left=0.2, right=0.9, top=0.9, bottom=0.1)
-    ax1 = fig.add_subplot(211)
-    BM3_EOS_energy_plot(Vs, Fs, V0s, E0s, K0s, Kp0s, Ts=Ts, ax=ax1)
-    ax2 = fig.add_subplot(212)
+    if axs is None:
+        fig = plt.figure(figsize=(5.83,8.27), dpi=150)
+        fig.subplots_adjust(left=0.2, right=0.9, top=0.9, bottom=0.1)
+        ax1 = fig.add_subplot(211)
+    else:
+        ax1 = axs[0]
+    BM3_EOS_energy_plot(Vs, Fs, V0s, E0s, K0s, Kp0s, Ts=Ts, ax=ax1, leg=False)
+    if axs is None:
+        ax2 = fig.add_subplot(212)
+    else:
+        ax2 = axs[1]
     BM3_EOS_pressure_plot(minV, maxV, V0s, K0s, 
         Kp0s, Ts=Ts, ax=ax2, leg=False)
     if filename is not None:
         plt.savefig(filename)
-    else:
+    elif axs is None:
         plt.show()
 
 
