@@ -142,14 +142,15 @@ def run_and_report(seedname, fineqpoints=None):
 
 
 def plot_beta(Ts, betas, names=None, styles=None, colors=None, 
-     filename=None, ax=None):
+     filename=None, ax=None, ylim=None):
 
     import matplotlib
     if filename is not None:
         matplotlib.use('Agg')
     import matplotlib.pyplot as plt
 
-    Tsm1 = 1E6/(Ts**2.0)
+    Tsm1 = 1.0E6/(Ts**2.0)
+          
     if ax is not None:
         ax1 = ax
     else:
@@ -170,32 +171,32 @@ def plot_beta(Ts, betas, names=None, styles=None, colors=None,
         ax1.plot(Tsm1, betas, "b-")
     ax1.set_ylabel(r"$1000.\ln \beta$" + "(" + u'\u2030' + ")")
     ax1.set_xlabel("$1000000 / T^2$ ($10^6$ K$^{-2}$)")
-    ax1.set_xlim(right=Tsm1.max())
-    x1locs = ax1.get_xticks()
-    x1labels = ax1.get_xticklabels()
+    if ylim is not None:
+        ax1.set_ylim(ylim)
+    
 
     if names is not None:
         ax1.legend(loc=2)
+        
+    #Tn = np.linspace(10, 5000, 2002)
+    #Tsm1n = 1.0E6/(Tn**2.0)
+    #def forward(x):
+    #    return np.interp(x, Tsm1n, Tn)
+    #def reverse(x):
+    #    return np.interp(x, Tn, Tsm1n)
 
-    ax2 = ax1.twiny()
-    ax2.set_xlabel("T (K)")
-    x2vals = []
-    x2locs = []
-    max_pos = 1E6/(Ts.min()**2.0)
-    min_pos = 1E6/(Ts.max()**2.0)
-    for xloc in np.linspace(min_pos, max_pos, 6):
-        thisval = np.sqrt((1.0/(xloc/1E6)))
-        if thisval != float("inf"):
-            x2vals.append("{:4.0f}".format(thisval))
-            x2locs.append(xloc)
-    ax2.set_xticks(x2locs)
-    ax2.set_xticklabels(x2vals)
+    #ax2 = ax1.secondary_xaxis('top', functions=(forward, reverse))
+    #ax2.set_xlabel("T (K)")
+    #ax2.set_xticks([400, 1000, 1200, 1500, 2000, 3000])
+    
+    ax1.set_xlim(right=Tsm1.max())
 
     if filename is not None:
         plt.savefig(filename)
     elif ax is None:
         plt.show()
 
+        
 def cleanup(seedname):
 
     print("Cleaning up...")
