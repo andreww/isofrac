@@ -178,7 +178,7 @@ def plot_beta(Ts, betas, names=None, styles=None, colors=None,
     if names is not None:
         ax1.legend(loc=2)
         
-    #Tn = np.linspace(10, 5000, 2002)
+    #Tn = np.concatenate((np.linspace(0, 290, 10), Ts, np.linspace(4001, 5000, 10)))
     #Tsm1n = 1.0E6/(Tn**2.0)
     #def forward(x):
     #    return np.interp(x, Tsm1n, Tn)
@@ -187,7 +187,7 @@ def plot_beta(Ts, betas, names=None, styles=None, colors=None,
 
     #ax2 = ax1.secondary_xaxis('top', functions=(forward, reverse))
     #ax2.set_xlabel("T (K)")
-    #ax2.set_xticks([400, 1000, 1200, 1500, 2000, 3000])
+    #ax2.set_xticks([2000])
     
     ax1.set_xlim(right=Tsm1.max())
 
