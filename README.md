@@ -3,7 +3,7 @@ isofrac
 
 Tools for computing equilibrium Mg isotope fractionation factors from CASTEP phonon calculations and visualizing fractionation between phases.
 
-These scripts and notebooks were used in the preparation of the manuscript *“Controls on Mg isotopic fractionation between deep mantle phases and relict signatures of a terrestrial magma ocean”* (Andrew M. Walker, Remco C. Hin, Tim Elliott); see the preprint at https://doi.org/10.31223/X5SJ1F. Releases of this code are archived on Zenodo at https://doi.org/10.5281/zenodo.16744738.CASTEP data files can be found at https://doi.org/10.5281/zenodo.16760721.
+These scripts and notebooks were used in the preparation of the manuscript *“Controls on Mg isotopic fractionation between deep mantle phases and relict signatures of a terrestrial magma ocean”* (Andrew M. Walker, Remco C. Hin, Tim Elliott); see the preprint at https://doi.org/10.31223/X5SJ1F. Releases of this code are archived on Zenodo at https://doi.org/10.5281/zenodo.16744738. CASTEP data files can be found at https://doi.org/10.5281/zenodo.16760721.
 
 This code is from a research workflow and is not intended as polished, general-purpose software. Expect to adapt pieces manually and bring appropriate expertise.
 
