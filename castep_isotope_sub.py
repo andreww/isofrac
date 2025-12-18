@@ -182,20 +182,18 @@ def plot_beta(Ts, betas, names=None, styles=None, colors=None,
 
     if names is not None:
         ax1.legend(loc=2)
-        
-    #Tn = np.concatenate((np.linspace(0, 290, 10), Ts, np.linspace(4001, 5000, 10)))
-    #Tsm1n = 1.0E6/(Tn**2.0)
-    #def forward(x):
-    #    return np.interp(x, Tsm1n, Tn)
-    #def reverse(x):
-    #    return np.interp(x, Tn, Tsm1n)
 
-    #ax2 = ax1.secondary_xaxis('top', functions=(forward, reverse))
-    #ax2.set_xlabel("T (K)")
-    #ax2.set_xticks([2000])
+    def forward(x):
+        x[x < 1E-10] = 1E-10
+        return np.sqrt(1.0E6/x)
+    def reverse(x):
+        x[x < 1E-10] = 1E-10
+        return 1.0E6/(x**2)
+
+    ax2 = ax1.secondary_xaxis('top', functions=(forward, reverse))
+    ax2.set_xlabel("T (K)")
+    ax2.set_xticks([300, 350, 400, 500, 750, 2000])
     
-    ax1.set_xlim(right=Tsm1.max())
-
     if filename is not None:
         plt.savefig(filename)
     elif ax is None:
