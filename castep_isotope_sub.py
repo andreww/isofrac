@@ -142,7 +142,8 @@ def run_and_report(seedname, fineqpoints=None):
 
 
 def plot_beta(Ts, betas, names=None, styles=None, colors=None, 
-     filename=None, ax=None, ylim=None, xlim=None, texttoadd=None):
+     filename=None, ax=None, ylim=None, xlim=None, texttoadd=None,
+     notop=False, nobot=False):
 
     import matplotlib
     if filename is not None:
@@ -173,8 +174,10 @@ def plot_beta(Ts, betas, names=None, styles=None, colors=None,
         for t in texttoadd:
             ax1.text(t["x"], t["y"], t["s"], rotation=t["r"])
 
+    
     ax1.set_ylabel(r"$1000.\ln \beta$" + "(" + u'\u2030' + ")")
-    ax1.set_xlabel("$1000000 / T^2$ ($10^6$ K$^{-2}$)")
+    if not nobot:
+        ax1.set_xlabel("$1000000 / T^2$ ($10^6$ K$^{-2}$)")
     if ylim is not None:
         ax1.set_ylim(ylim)
     if xlim is not None:
@@ -190,9 +193,10 @@ def plot_beta(Ts, betas, names=None, styles=None, colors=None,
         x[x < 1E-10] = 1E-10
         return 1.0E6/(x**2)
 
-    ax2 = ax1.secondary_xaxis('top', functions=(forward, reverse))
-    ax2.set_xlabel("T (K)")
-    ax2.set_xticks([300, 350, 400, 500, 750, 2000])
+    if not notop:
+        ax2 = ax1.secondary_xaxis('top', functions=(forward, reverse))
+        ax2.set_xlabel("T (K)")
+        ax2.set_xticks([300, 350, 400, 500, 750, 2000])
     
     if filename is not None:
         plt.savefig(filename)
