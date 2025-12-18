@@ -142,7 +142,7 @@ def run_and_report(seedname, fineqpoints=None):
 
 
 def plot_beta(Ts, betas, names=None, styles=None, colors=None, 
-     filename=None, ax=None, ylim=None):
+     filename=None, ax=None, ylim=None, xlim=None):
 
     import matplotlib
     if filename is not None:
@@ -173,7 +173,8 @@ def plot_beta(Ts, betas, names=None, styles=None, colors=None,
     ax1.set_xlabel("$1000000 / T^2$ ($10^6$ K$^{-2}$)")
     if ylim is not None:
         ax1.set_ylim(ylim)
-    
+    if xlim is not None:
+        ax1.set_xlim(xlim)
 
     if names is not None:
         ax1.legend(loc=2)
