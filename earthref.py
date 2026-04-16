@@ -212,14 +212,14 @@ class EarthModel():
         # Integrate density to get mass
         # eq 4.43 of Fowler
         mass = np.zeros_like(r)
-        mass[1:] = 4.0*np.pi*spint.cumtrapz((r**2 * rho),r)
+        mass[1:] = 4.0*np.pi*spint.cumulative_trapezoid((r**2 * rho),r)
         # Calculate gravity (eq. 4.32 of Fowler)
         g = np.zeros_like(r)
         g[1:] = (G*mass[1:])/r[1:]**2
         # Integrate -g*rho from surface to core to 
         # get density (eq 4.31 of Fowler)
         P = np.zeros_like(r)
-        P[1:] = spint.cumtrapz((-g*rho)[::-1],r[::-1])
+        P[1:] = spint.cumulative_trapezoid((-g*rho)[::-1],r[::-1])
         P = P[::-1]
         return (mass, g, P)
 
