@@ -175,7 +175,7 @@ def plot_beta(Ts, betas, names=None, styles=None, colors=None,
             ax1.text(t["x"], t["y"], t["s"], rotation=t["r"])
 
     
-    ax1.set_ylabel(r"$1000.\ln \beta$" + "(" + u'\u2030' + ")")
+    ax1.set_ylabel(r"$1000.\ln \beta(X, ^{24}\mathrm{Mg}, ^{26}\mathrm{Mg})$" + " (" + u'\u2030' + ")")
     if not nobot:
         ax1.set_xlabel("$1000000 / T^2$ ($10^6$ K$^{-2}$)")
     if ylim is not None:
